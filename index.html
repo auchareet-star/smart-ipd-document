@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart IPD — ศูนย์รวมเอกสาร (Documentation Hub)</title>
+<style>
+  :root{
+    --bg:#f4f7fb; --card:#fff; --ink:#1f2733; --muted:#5b6675; --line:#dde3ea;
+    --own:#137a3f; --ownbg:#e7f6ec; --need:#1763c6; --needbg:#e6f0fc;
+    --ch1:#7b3fe4; --ch1bg:#f1eafd; --ch2:#1763c6; --ch2bg:#e6f0fc; --ch3:#0a8f7f; --ch3bg:#e0f6f2;
+    --warn:#9a6a00; --warnbg:#fff6df;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Segoe UI","Sarabun","Noto Sans Thai",Tahoma,sans-serif; line-height:1.75; font-size:15.5px;}
+  .wrap{max-width:1080px; margin:0 auto; padding:34px 20px 90px;}
+
+  header.doc{background:linear-gradient(135deg,#1763c6,#0a8f7f); color:#fff;
+    border-radius:16px; padding:34px 38px; margin-bottom:30px; box-shadow:0 6px 22px rgba(23,99,198,.22);}
+  header.doc h1{margin:0 0 10px; font-size:28px;}
+  header.doc p{margin:6px 0; opacity:.95; font-size:15px; max-width:760px;}
+  header.doc .meta{display:flex; flex-wrap:wrap; gap:10px; margin-top:16px;}
+  header.doc .tag{display:inline-block; background:rgba(255,255,255,.18); padding:5px 14px; border-radius:20px; font-size:13px;}
+
+  .grouphead{display:flex; align-items:center; gap:12px; margin:34px 0 14px;}
+  .grouphead .num{flex:none; width:30px; height:30px; border-radius:50%; background:var(--need); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px;}
+  .grouphead h2{margin:0; font-size:20px;}
+  .grouphead .desc{color:var(--muted); font-size:13.5px; margin:0;}
+
+  .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:18px;}
+  .grid.one{grid-template-columns:1fr;}
+
+  a.cardlink{text-decoration:none; color:inherit; display:block;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px 24px;
+    box-shadow:0 1px 4px rgba(0,0,0,.04); height:100%; transition:transform .12s, box-shadow .12s, border-color .12s;
+    border-left:5px solid var(--line);}
+  a.cardlink:hover .card{transform:translateY(-3px); box-shadow:0 10px 26px rgba(23,99,198,.16); border-left-color:var(--need);}
+  .card.c-own{border-left-color:var(--own);} a.cardlink:hover .card.c-own{border-left-color:var(--own);}
+  .card.c-need{border-left-color:var(--need);}
+  .card.c-his{border-left-color:var(--ch1);} a.cardlink:hover .card.c-his{border-left-color:var(--ch1);}
+
+  .card .ic{font-size:26px; line-height:1;}
+  .card h3{margin:10px 0 4px; font-size:17.5px; display:flex; align-items:center; gap:8px;}
+  .card .file{font-size:12px; color:var(--muted); font-family:Consolas,Menlo,monospace; word-break:break-all;}
+  .card .does{font-size:14px; color:var(--ink); margin:12px 0;}
+  .card .tags{display:flex; flex-wrap:wrap; gap:7px; margin-top:12px;}
+  .pill{display:inline-block; padding:3px 11px; border-radius:20px; font-size:12px; font-weight:700; white-space:nowrap;}
+  .own{background:var(--ownbg); color:var(--own);}
+  .need{background:var(--needbg); color:var(--need);}
+  .ch1{background:var(--ch1bg); color:var(--ch1);}
+  .ch3{background:var(--ch3bg); color:var(--ch3);}
+  .warn{background:var(--warnbg); color:var(--warn);}
+  .card .open{margin-top:14px; font-size:13.5px; font-weight:700; color:var(--need);}
+  a.cardlink:hover .card .open{text-decoration:underline;}
+
+  .stats{display:flex; gap:18px; flex-wrap:wrap; margin-top:12px;}
+  .stats .s{font-size:13px; color:var(--muted);} .stats .s b{color:var(--ink); font-size:15px;}
+
+  footer{margin-top:40px; text-align:center; color:var(--muted); font-size:13px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="doc">
+    <h1>📚 Smart IPD — ศูนย์รวมเอกสาร</h1>
+    <p>หน้ารวมเอกสารทั้งหมดของ Smart IPD: การวิเคราะห์ API, ข้อกำหนดการเชื่อมต่อกับ HIS และคู่มือสำหรับพันธมิตร</p>
+    <p>เลือกเอกสารที่ต้องการจากหมวดด้านล่าง — แต่ละหมวดเรียงจาก “ภาพรวม” ไปสู่ “รายละเอียดทางเทคนิค”</p>
+    <div class="meta">
+      <span class="tag">📄 6 เอกสาร</span>
+      <span class="tag">🏥 Smart IPD ↔ HIS Integration</span>
+      <span class="tag">🔄 อัปเดต: มิ.ย. 2026</span>
+    </div>
+  </header>
+
+  <!-- ── หมวด 1: ภาพรวม ───────────────────────────── -->
+  <div class="grouphead">
+    <span class="num">1</span>
+    <div>
+      <h2>เริ่มต้นที่นี่ — ภาพรวม</h2>
+      <p class="desc">อ่านก่อนเพื่อเข้าใจภาพรวมทั้งระบบ ไม่ลงรายละเอียดเทคนิค</p>
+    </div>
+  </div>
+  <div class="grid one">
+    <a class="cardlink" href="SmartIPD-HIS-Integration-Overview.html">
+      <div class="card c-own">
+        <div class="ic">🗺️</div>
+        <h3>Smart IPD เชื่อมต่อกับ HIS ได้อย่างไร</h3>
+        <div class="file">SmartIPD-HIS-Integration-Overview.html</div>
+        <div class="does">ภาพรวมแบบเข้าใจง่าย — Smart IPD มีข้อมูลอะไรเป็นของตัวเอง, ทำอะไรได้บ้าง และต้องขอข้อมูลอะไรจาก HIS เมื่อแยกออกมาเป็นระบบอิสระ</div>
+        <div class="tags">
+          <span class="pill own">ผู้บริหาร</span>
+          <span class="pill own">ทีมโรงพยาบาล</span>
+          <span class="pill own">ฝ่ายเชื่อมต่อระบบ</span>
+          <span class="pill warn">ไม่เทคนิค</span>
+        </div>
+        <div class="open">เปิดเอกสาร →</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- ── หมวด 2: API ของ Smart IPD ─────────────────── -->
+  <div class="grouphead">
+    <span class="num">2</span>
+    <div>
+      <h2>API &amp; ความเป็นเจ้าของข้อมูลของ Smart IPD</h2>
+      <p class="desc">Smart IPD เรียก API อะไรบ้าง อะไรเป็นของตัวเอง อะไรพึ่งพา HAOS/HIS</p>
+    </div>
+  </div>
+  <div class="grid">
+    <a class="cardlink" href="SmartIPD-API-Ownership-Analysis.html">
+      <div class="card c-own">
+        <div class="ic">🔍</div>
+        <h3>การวิเคราะห์ API &amp; ความเป็นเจ้าของข้อมูล</h3>
+        <div class="file">SmartIPD-API-Ownership-Analysis.html</div>
+        <div class="does">วิเคราะห์ว่า Smart IPD เรียก API อะไรบ้าง (ของตัวเอง vs HAOS) และข้อมูลใดนำมาเป็นของตัวเองได้ เพื่อลดการพึ่งพา HAOS API</div>
+        <div class="tags">
+          <span class="pill own">เป็นของตัวเอง</span>
+          <span class="pill need">พึ่งพา HAOS</span>
+          <span class="pill ch3">สถาปนิก/ทีม Dev</span>
+        </div>
+        <div class="open">เปิดเอกสาร →</div>
+      </div>
+    </a>
+    <a class="cardlink" href="SmartIPD-API-Spec.html">
+      <div class="card c-need">
+        <div class="ic">📘</div>
+        <h3>Smart IPD — API Specification</h3>
+        <div class="file">SmartIPD-API-Spec.html</div>
+        <div class="does">เอกสารอ้างอิง REST API ทั้งหมดของ Smart IPD Backend จัดกลุ่มตามหมวดงาน พร้อมระบุความเป็นเจ้าของข้อมูล</div>
+        <div class="stats">
+          <span class="s"><b>362</b> Endpoints</span>
+          <span class="s"><b>33</b> Controllers</span>
+          <span class="s"><b>14</b> หมวดงาน</span>
+        </div>
+        <div class="open">เปิดเอกสาร →</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- ── หมวด 3: การเชื่อมต่อกับ HIS ─────────────────── -->
+  <div class="grouphead">
+    <span class="num">3</span>
+    <div>
+      <h2>การเชื่อมต่อกับ HIS</h2>
+      <p class="desc">ข้อกำหนดและคู่มือสำหรับเชื่อม Smart IPD เข้ากับ HIS เจ้าใดก็ได้</p>
+    </div>
+  </div>
+  <div class="grid">
+    <a class="cardlink" href="SmartIPD-HIS-Integration-Spec.html">
+      <div class="card c-his">
+        <div class="ic">🔌</div>
+        <h3>HIS Integration Specification</h3>
+        <div class="file">SmartIPD-HIS-Integration-Spec.html</div>
+        <div class="does">ข้อกำหนดการเชื่อมต่อแบบ Vendor-Neutral · สถาปัตยกรรม Port–Adapter (Hexagonal) ต่อยอดจาก IHisAdapter ที่มีอยู่</div>
+        <div class="tags">
+          <span class="pill ch1">Vendor-Neutral</span>
+          <span class="pill ch3">สถาปนิก/ทีม Dev</span>
+          <span class="pill warn">v0.1 Draft</span>
+        </div>
+        <div class="open">เปิดเอกสาร →</div>
+      </div>
+    </a>
+    <a class="cardlink" href="SmartIPD-HIS-Partner-Integration-Guide.html">
+      <div class="card c-his">
+        <div class="ic">🤝</div>
+        <h3>คู่มือเตรียมความพร้อมสำหรับทีม HIS</h3>
+        <div class="file">SmartIPD-HIS-Partner-Integration-Guide.html</div>
+        <div class="does">Partner Onboarding Guide — ทีม HIS ต้องเตรียม/จัดให้อะไรบ้างเพื่อเชื่อมต่อ ฝั่ง Smart IPD เป็นคนพัฒนาตัวเชื่อม</div>
+        <div class="tags">
+          <span class="pill ch1">ทีม HIS</span>
+          <span class="pill own">เตรียมความพร้อม</span>
+          <span class="pill need">Onboarding</span>
+        </div>
+        <div class="open">เปิดเอกสาร →</div>
+      </div>
+    </a>
+    <a class="cardlink" href="SmartIPD-HIS-Provider-API-Spec.html">
+      <div class="card c-his">
+        <div class="ic">⚙️</div>
+        <h3>HIS Provider API Specification</h3>
+        <div class="file">SmartIPD-HIS-Provider-API-Spec.html</div>
+        <div class="does">รายการ “ความสามารถ” ที่ HIS ต้องเปิดให้ Smart IPD ใช้ — ครบทุกรายการ พร้อมทิศทาง · ระดับจำเป็น · ช่องทาง · ฟิลด์ข้อมูล</div>
+        <div class="stats">
+          <span class="s"><b>~40</b> operation หลัก</span>
+          <span class="s"><b>50+</b> master/lookup</span>
+          <span class="s"><b>139</b> write ops</span>
+        </div>
+        <div class="open">เปิดเอกสาร →</div>
+      </div>
+    </a>
+  </div>
+
+  <footer>
+    Smart IPD Documentation Hub · เอกสารทั้งหมดเป็นไฟล์ HTML แบบ standalone เปิดได้จากหน้านี้
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart IPD — การวิเคราะห์ API และความเป็นเจ้าของข้อมูล</title>
+<style>
+  :root{
+    --bg:#f6f8fa; --card:#fff; --ink:#1f2328; --muted:#57606a; --line:#d0d7de;
+    --t1:#1a7f37; --t1bg:#e8f5e9; --t2:#9a6700; --t2bg:#fff8e1; --t3:#cf222e; --t3bg:#ffeef0;
+    --accent:#0969da; --accentbg:#ddf4ff; --warn:#bf8700; --warnbg:#fff8c5; --code:#eaeef2;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Segoe UI","Sarabun","Noto Sans Thai",Tahoma,sans-serif;
+    line-height:1.7; font-size:15px;
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:32px 20px 80px;}
+  header.doc{
+    background:linear-gradient(135deg,#0969da,#0a3069); color:#fff;
+    border-radius:14px; padding:28px 32px; margin-bottom:28px;
+    box-shadow:0 4px 18px rgba(9,105,218,.25);
+  }
+  header.doc h1{margin:0 0 8px; font-size:26px;}
+  header.doc p{margin:4px 0; opacity:.92; font-size:14px;}
+  header.doc .meta{margin-top:14px; font-size:12.5px; opacity:.85; border-top:1px solid rgba(255,255,255,.25); padding-top:12px;}
+  header.doc code{background:rgba(255,255,255,.18); color:#fff; padding:1px 6px; border-radius:5px;}
+
+  nav.toc{
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:18px 24px; margin-bottom:28px;
+  }
+  nav.toc h2{margin:0 0 10px; font-size:16px; color:var(--muted);}
+  nav.toc ol{margin:0; padding-left:22px; columns:2; column-gap:34px;}
+  nav.toc a{color:var(--accent); text-decoration:none;}
+  nav.toc a:hover{text-decoration:underline;}
+
+  section{
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:24px 28px; margin-bottom:24px; box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  h2.sec{margin:0 0 16px; font-size:21px; padding-bottom:10px; border-bottom:2px solid var(--line);}
+  h3{font-size:17px; margin:24px 0 10px;}
+  p{margin:10px 0;}
+  ul,ol{margin:10px 0; padding-left:24px;}
+  li{margin:5px 0;}
+  code{background:var(--code); padding:1.5px 6px; border-radius:5px; font-family:"Cascadia Code",Consolas,monospace; font-size:13px;}
+  strong{color:#000;}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13.5px;}
+  th,td{border:1px solid var(--line); padding:8px 11px; text-align:left; vertical-align:top;}
+  th{background:#f0f3f6; font-weight:600;}
+  tbody tr:nth-child(even){background:#fafbfc;}
+
+  .pill{display:inline-block; padding:1px 9px; border-radius:20px; font-size:12px; font-weight:600; white-space:nowrap;}
+  .t1{background:var(--t1bg); color:var(--t1);}
+  .t2{background:var(--t2bg); color:var(--t2);}
+  .t3{background:var(--t3bg); color:var(--t3);}
+  .hy{background:var(--accentbg); color:var(--accent);}
+
+  .callout{border-radius:10px; padding:14px 18px; margin:16px 0; border:1px solid;}
+  .callout.key{background:var(--accentbg); border-color:#54aeff;}
+  .callout.warn{background:var(--warnbg); border-color:#d4a72c;}
+  .callout p:first-child{margin-top:0;} .callout p:last-child{margin-bottom:0;}
+  .callout .lbl{font-weight:700; display:block; margin-bottom:4px;}
+
+  .tier-head{display:flex; align-items:center; gap:10px; margin:26px 0 8px;}
+  .tier-head .dot{width:14px; height:14px; border-radius:50%;}
+  .tier-head.g .dot{background:var(--t1);} .tier-head.y .dot{background:var(--t2);} .tier-head.r .dot{background:var(--t3);}
+  .tier-head h3{margin:0;}
+
+  .arch{
+    background:#0d1117; color:#c9d1d9; border-radius:10px; padding:18px 22px;
+    font-family:"Cascadia Code",Consolas,monospace; font-size:12.5px; line-height:1.55;
+    white-space:pre; overflow-x:auto; margin:14px 0;
+  }
+  .legend{display:flex; gap:18px; flex-wrap:wrap; margin:12px 0 4px; font-size:13px;}
+  .legend span{display:flex; align-items:center; gap:6px;}
+  footer{text-align:center; color:var(--muted); font-size:12.5px; margin-top:30px;}
+  @media print{
+    body{background:#fff;} section,nav.toc,header.doc{box-shadow:none; border:1px solid #ccc; break-inside:avoid;}
+    nav.toc ol{columns:1;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="doc">
+  <h1>Smart IPD — การวิเคราะห์ API และความเป็นเจ้าของข้อมูล</h1>
+  <p>API &amp; Data Ownership Analysis — วิเคราะห์ว่า Smart IPD เรียก API อะไรบ้าง (ของตัวเอง vs HAOS) และข้อมูลใดสามารถนำมาเป็นของตัวเองได้ เพื่อลดการพึ่งพา HAOS API</p>
+  <div class="meta">
+    อ้างอิงจาก codebase จริง 2 ฝั่ง:
+    <code>ayodia-haos-smart-ipd\src\backend</code> และ <code>top-panacea</code> (HAOS HIS)
+    &nbsp;•&nbsp; ฐานข้อมูล API: <code>SmartIPD API Grouping.csv</code> — 362 endpoints / 33 controllers
+  </div>
+</header>
+
+<nav class="toc">
+  <h2>สารบัญ</h2>
+  <ol>
+    <li><a href="#s1">สรุปผู้บริหาร</a></li>
+    <li><a href="#s2">สถาปัตยกรรมการเชื่อมต่อปัจจุบัน</a></li>
+    <li><a href="#s3">การตรวจสอบความถูกต้องของ CSV</a></li>
+    <li><a href="#s4">สรุป API แยกตามกลุ่มงาน</a></li>
+    <li><a href="#s5">การวิเคราะห์: อะไรที่ยึดเป็นของตัวเองได้ (3 Tier)</a></li>
+    <li><a href="#s6">แผนเชิงปฏิบัติ (Roadmap)</a></li>
+    <li><a href="#a1">ภาคผนวก A — ตาราง IPD ในฐานข้อมูล HAOS</a></li>
+    <li><a href="#a2">ภาคผนวก B — Local DB ของ Smart IPD</a></li>
+  </ol>
+</nav>
+
+<!-- ============ 1 ============ -->
+<section id="s1">
+  <h2 class="sec">1. สรุปผู้บริหาร (Executive Summary)</h2>
+  <ol>
+    <li><strong>Smart IPD เป็น "hybrid proxy"</strong> — ปัจจุบันเกือบทุก endpoint proxy ไปยัง HAOS โดยมี <strong>local DB ของตัวเองแค่ 3 ตาราง (เรื่อง auth เท่านั้น)</strong> คือ <code>Users</code>, <code>UserAccounts</code>, <code>RefreshTokens</code></li>
+    <li><strong>ข้อมูลคลินิกของ IPD ทั้งหมดอยู่ในฐานข้อมูล HAOS</strong> ในรูปตาราง <code>TB_IPD_*</code> (transaction) และ <code>TBM_IPD_*</code> (master/config) — ตารางเหล่านี้ <strong>ถูกสร้างตอนพัฒนา Smart IPD</strong> ตามที่เข้าใจไว้ถูกต้อง (พบ ~55 ตาราง)</li>
+    <li>Smart IPD เข้าถึง HAOS ผ่าน <strong>2 ช่องทาง</strong>:
+      <ul>
+        <li><strong>HAOS API</strong> — Kiota-generated client (<code>HAOS.SmartIPD.Libs.HaosClient</code>)</li>
+        <li><strong>เชื่อม HAOS DB ตรง</strong> — connection string <code>HaosConnection</code> ผ่าน <code>HaosDatabaseService</code> / Dapper / Stored Procedure</li>
+      </ul>
+    </li>
+    <li><strong>โอกาสลดการพึ่งพา HAOS API = การ "ยึดครอง" ตาราง <code>TB_IPD_*</code> / <code>TBM_IPD_*</code> มาเป็นของ Smart IPD</strong> เพราะเป็น domain ของ IPD โดยแท้ ไม่ใช่แกนกลางของ HIS</li>
+  </ol>
+  <div class="legend">
+    <span><span class="pill t1">Tier 1</span> ยึดได้ทันที — master/config (~22 ตาราง)</span>
+    <span><span class="pill t2">Tier 2</span> ยึดได้แต่ต้องจัดการ FK — transaction (~33 ตาราง)</span>
+    <span><span class="pill t3">Tier 3</span> ยึดไม่ได้ — แกน HIS</span>
+  </div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section id="s2">
+  <h2 class="sec">2. สถาปัตยกรรมการเชื่อมต่อปัจจุบัน</h2>
+<div class="arch">                Smart IPD WebAPI (33 Controllers)
+                          │
+              Application Services / Handlers
+                          │
+                 HaosHisAdapter  (IHisAdapter, 31 partial classes)
+                  /                         \
+     [ช่องทาง A] HAOS API                [ช่องทาง B] HAOS DB ตรง
+     HaosClient (Kiota SDK)              HaosDatabaseService (Dapper/SQL)
+     auth: HaosApi:ClientId/SecretKey    conn: "HaosConnection"
+                  │                              │
+                  └──────────►  HAOS HIS  ◄──────┘
+                       (DB เดียว: TB_*, TBM_*, TB_IPD_*, TBM_IPD_*)
+
+  Smart IPD Local DB (haos_smartipd) — ConnectionStrings:DefaultConnection
+     • Users • UserAccounts • RefreshTokens   ← มีแค่นี้ (auth เท่านั้น)</div>
+  <h3>ไฟล์อ้างอิงหลัก</h3>
+  <table>
+    <thead><tr><th>หน้าที่</th><th>ไฟล์</th></tr></thead>
+    <tbody>
+      <tr><td>Kiota client (HAOS API)</td><td><code>HAOS.SmartIPD.Libs.HaosClient/HaosApiClient.cs</code></td></tr>
+      <tr><td>Adapter (เลือก API หรือ DB)</td><td><code>HAOS.SmartIPD.Infrastructure/Services/HIS/HaosHisAdapter.*.cs</code> (31 partial)</td></tr>
+      <tr><td>เข้าถึง HAOS DB ตรง</td><td><code>HAOS.SmartIPD.Infrastructure/Services/HIS/Services/HaosDatabaseService.cs</code></td></tr>
+      <tr><td>Local DbContext (3 DbSet)</td><td><code>HAOS.SmartIPD.Infrastructure/Data/SmartIPDDbContext.cs</code></td></tr>
+      <tr><td>Connection strings</td><td><code>HAOS.SmartIPD.WebAPI/appsettings.json</code> (<code>DefaultConnection</code>=local, <code>HaosConnection</code>=HAOS)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 3 ============ -->
+<section id="s3">
+  <h2 class="sec">3. การตรวจสอบความถูกต้องของ CSV</h2>
+  <div class="callout key">
+    <span class="lbl">สรุป</span>
+    <p>CSV ถูกต้องเป็นส่วนใหญ่และครอบคลุมครบทั้ง <strong>33 controllers / 362 endpoints</strong> ✅ แต่มีจุดที่ควรปรับเพื่อสะท้อนความจริงของ codebase</p>
+  </div>
+  <table>
+    <thead><tr><th>ประเด็น</th><th>CSV ระบุ</th><th>ความจริงจาก code</th><th>ผลกระทบ</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>PatientTag</strong> (6 endpoints, rows 327–332)</td>
+        <td><code>smart_ipd_only</code> / <code>smart_ipd_local_db</code></td>
+        <td>จริง ๆ เก็บที่ <strong><code>TB_PATIENT_TAGS</code> ในฐานข้อมูล HAOS</strong> ผ่าน <code>PatientTagRepository</code> ที่ใช้ <code>HaosConnection</code> (ไม่ใช่ local DB)</td>
+        <td>⚠️ ควรแก้เป็น "smart_ipd-owned แต่อยู่ใน HAOS DB" — เป็น candidate ย้ายเข้า local DB ได้ทันที</td>
+      </tr>
+      <tr>
+        <td><code>integration_mode = haos_adapter</code></td>
+        <td>สื่อว่า "เรียก HAOS API"</td>
+        <td><code>haos_adapter</code> = "ผ่าน HaosHisAdapter" ซึ่งภายใน<strong>เลือกได้ทั้งเรียก API หรือ query DB ตรง</strong></td>
+        <td>ℹ️ <code>haos_adapter</code> ≠ เรียก API เสมอ หลายเส้นเป็น direct DB</td>
+      </tr>
+      <tr>
+        <td><code>haos_db_direct_lookup</code> / <code>haos_db_direct_image</code></td>
+        <td>mark เป็น hybrid</td>
+        <td>✅ ตรงกับ code (StandardTimeOptions, patient picture)</td>
+        <td>ถูกต้อง</td>
+      </tr>
+      <tr>
+        <td>Auth = hybrid (HAOS login + local JWT)</td>
+        <td>✅</td>
+        <td>✅ ตรง — <code>RefreshToken</code>/<code>User</code> อยู่ local DB จริง</td>
+        <td>ถูกต้อง</td>
+      </tr>
+      <tr>
+        <td>Chat/AI = local LLM on shared data</td>
+        <td>✅</td>
+        <td>✅ ตรง — มี local cache + LLM provider, ดึงข้อมูลคลินิกจาก HAOS</td>
+        <td>ถูกต้อง</td>
+      </tr>
+      <tr>
+        <td>Xray DICOM (rows 361–362) = local file</td>
+        <td>✅</td>
+        <td>✅ ตรง — อ่านไฟล์จาก <code>App_Data/dicom/</code></td>
+        <td>ถูกต้อง</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout warn">
+    <span class="lbl">ข้อเสนอเพิ่ม column ใน CSV</span>
+    <p>ควรเพิ่มคอลัมน์ <code>backing_table</code> (เช่น <code>TB_IPD_ORDER_NOTES</code>) และ <code>ownership_target_tier</code> (1/2/3) เพื่อใช้ขับเคลื่อนแผนการแยกระบบในข้อ 5</p>
+  </div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="s4">
+  <h2 class="sec">4. สรุป API แยกตามกลุ่มงาน (Inventory by Flow Group)</h2>
+  <p>จาก CSV 362 endpoints จัดกลุ่มได้ดังนี้ (ownership = สถานะปัจจุบัน):</p>
+  <table>
+    <thead><tr><th>flow_group</th><th>Controller หลัก</th><th>ลักษณะข้อมูล</th><th>เจ้าของปัจจุบัน</th></tr></thead>
+    <tbody>
+      <tr><td><code>appointment</code></td><td>Appointment</td><td>นัดหมาย (แกน HIS)</td><td><span class="pill t3">HAOS</span></td></tr>
+      <tr><td><code>authentication</code></td><td>Auth</td><td>login + JWT</td><td><span class="pill hy">Hybrid (local JWT)</span></td></tr>
+      <tr><td><code>ai_assistant</code></td><td>Chat</td><td>LLM ผู้ช่วย</td><td><span class="pill hy">Smart IPD + ข้อมูล HAOS</span></td></tr>
+      <tr><td><code>local_extensions</code></td><td>Chat(health), PatientTag, Xray(dicom)</td><td>ส่วนขยายเฉพาะ Smart IPD</td><td><span class="pill hy">Smart IPD / HAOS DB</span></td></tr>
+      <tr><td><code>clinical_documentation</code></td><td>DischargeSummary, DoctorNotes, DoctorProblem, FocusItems, IntakeOutput, IpdAdmissionRecord, IpdFaieMasterData, IpdHistoryPhysical, IpdPreDiagnosis, MedReconcile, NurseNotes, NursingRecord</td><td><strong>เอกสารทางคลินิก IPD</strong></td><td><span class="pill t3">HAOS</span> <code>TB_IPD_*</code></td></tr>
+      <tr><td><code>orders_and_care_plan</code></td><td>GeneralOrder, Order, OrderNote, OrderPlan</td><td>คำสั่งแพทย์ + eMAR</td><td><span class="pill t3">HAOS</span> <code>TB_IPD_ORDER_*</code></td></tr>
+      <tr><td><code>lab</code></td><td>Lab</td><td>template + ผลแล็บ</td><td><span class="pill t3">HAOS</span></td></tr>
+      <tr><td><code>master_data</code></td><td>MasterData</td><td>lookup กลาง (ward/ICD/drug)</td><td><span class="pill t3">HAOS</span></td></tr>
+      <tr><td><code>medication_and_pharmacy</code></td><td>Medication, MedicationOrder, MedicationDispensing, PharmacistDispensing</td><td>ยา + จ่ายยา</td><td><span class="pill t3">HAOS</span> (master) + <code>TB_IPD_DISPENSING_*</code></td></tr>
+      <tr><td><code>reporting_and_export</code></td><td>Report, MedicalCertificate</td><td>รายงาน/ใบรับรอง</td><td><span class="pill hy">Hybrid</span> / <span class="pill t3">HAOS</span></td></tr>
+      <tr><td><code>user_lookup</code></td><td>User</td><td>directory แพทย์/พยาบาล</td><td><span class="pill t3">HAOS</span></td></tr>
+      <tr><td><code>vital_signs</code></td><td>VitalSigns</td><td>สัญญาณชีพ</td><td><span class="pill t3">HAOS</span> (<code>TB_VITAL_SIGNS</code>)</td></tr>
+      <tr><td><code>xray_and_pacs</code></td><td>Xray</td><td>ภาพถ่ายรังสี + PACS</td><td><span class="pill t3">HAOS</span> + local DICOM</td></tr>
+      <tr><td><code>patient_and_admission</code></td><td>Patient, HisAdapter</td><td>ผู้ป่วย/admission (แกน HIS)</td><td><span class="pill t3">HAOS</span></td></tr>
+    </tbody>
+  </table>
+  <div class="callout key">
+    <span class="lbl">ข้อสังเกตสำคัญ</span>
+    <p>กลุ่มที่ใหญ่ที่สุด (<code>clinical_documentation</code> + <code>orders_and_care_plan</code>) คือ <strong>domain ของ IPD โดยตรง</strong> และ map ตรงกับตาราง <code>TB_IPD_*</code> ที่ถูกสร้างตอนพัฒนา Smart IPD → นี่คือเป้าหมายหลักของการแยกออกมา</p>
+  </div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="s5">
+  <h2 class="sec">5. การวิเคราะห์: อะไรที่ Smart IPD เป็นเจ้าของเองได้</h2>
+  <p><strong>หลักการ:</strong> ข้อมูลที่ "เกิดและถูกใช้เฉพาะใน IPD workflow" → ควรเป็นของ Smart IPD ส่วนข้อมูล "แกนกลางของ HIS / ใช้ร่วมหลายระบบ (OPD, ER, billing)" → ต้องอยู่กับ HAOS</p>
+
+  <div class="tier-head g"><span class="dot"></span><h3><span class="pill t1">Tier 1</span> ยึดได้ทันที — Master/Config (แทบไม่ผูกข้อมูลผู้ป่วย)</h3></div>
+  <p>ตาราง <code>TBM_IPD_*</code> เป็น master data/template ที่ไม่มี FK ไปยังผู้ป่วย/admission (มีแค่ FK ผู้สร้าง/แก้ไข = <code>TB_USERS</code> ซึ่งแก้ได้ด้วยการเก็บ user id แบบ value)</p>
+  <table>
+    <thead><tr><th>API group</th><th>ตาราง backing (HAOS)</th><th>หมายเหตุ</th></tr></thead>
+    <tbody>
+      <tr><td><code>IpdFaieMasterData/*</code> (focuses, categories, subtypes, assessments, interventions, expected-outcomes, nurse-note-templates + logs)</td><td><code>TBM_IPD_FOCUSES</code>, <code>TBM_IPD_FOCUS_CATEGORIES</code>, <code>TBM_IPD_FOCUS_SUBTYPES</code>, <code>TBM_IPD_ASSESSMENTS</code>, <code>TBM_IPD_ASSESSMENT_ABNORMAL_FINDINGS</code>, <code>TBM_IPD_INTERVENTIONS</code>, <code>TBM_IPD_EXPECTED_OUTCOMES</code>, <code>TBM_IPD_NURSE_NOTE_TEMPLATES</code> (+3 link tables) + <code>*_LOGS</code></td><td>~20 ตาราง pure config</td></tr>
+      <tr><td><code>IntakeOutput/master/*</code></td><td><code>TBM_IPD_INTAKE</code>, <code>TBM_IPD_OUTPUT</code> (+ logs)</td><td>lookup อิสระเต็มตัว</td></tr>
+      <tr><td><code>PatientTag/*</code></td><td><code>TB_PATIENT_TAGS</code></td><td>เป็น Smart IPD-only อยู่แล้ว แค่ย้าย physical location</td></tr>
+    </tbody>
+  </table>
+  <p><strong>ผลที่ได้:</strong> endpoints กลุ่ม <code>IpdFaieMasterData</code> (~45 เส้น) + IntakeOutput master + PatientTag เลิกพึ่ง HAOS API ได้ทั้งหมด &nbsp;·&nbsp; <strong>ความเสี่ยง:</strong> <span style="color:var(--t1);font-weight:600">ต่ำ</span></p>
+
+  <div class="tier-head y"><span class="dot"></span><h3><span class="pill t2">Tier 2</span> ยึดได้ แต่ต้องจัดการการอ้างอิงข้ามระบบ — Transactional IPD</h3></div>
+  <p>ตาราง <code>TB_IPD_*</code> ที่เป็น transaction ของผู้ป่วย IPD — <strong>เนื้อหาเป็นของ IPD ล้วน</strong> แต่ผูกกับแกน HIS ผ่าน <code>AdmitId</code> (<code>TB_ADMITS</code>), <code>PatientId</code> (<code>TB_PATIENTS</code>), <code>DoctorId/NurseId</code> (<code>TB_USERS</code>)</p>
+  <table>
+    <thead><tr><th>API group</th><th>ตาราง backing (HAOS)</th><th>ผูกกับแกน HIS</th></tr></thead>
+    <tbody>
+      <tr><td><code>DoctorNotes</code>, <code>OrderNote</code> (+ details/logs)</td><td><code>TB_IPD_DOCTOR_NOTES</code>, <code>TB_IPD_DOCTOR_NOTE_CANVAS</code>, <code>TB_IPD_ORDER_NOTES</code>, <code>TB_IPD_ORDER_NOTE_DETAILS</code>, <code>TB_IPD_ORDER_*_LOGS</code></td><td>AdmitId, DoctorId</td></tr>
+      <tr><td><code>NurseNotes</code>, <code>FocusItems</code>, <code>NursingRecord</code></td><td><code>TB_IPD_NURSE_NOTES</code>, <code>TB_IPD_NURSE_FOCUS_ITEM</code>, <code>TB_IPD_PATIENT_NURSING_CARE_PLANS</code> (+child), <code>TB_IPD_PATIENT_NURSING_PROGRESS_NOTES</code> (+child)</td><td>AdmitId, NurseId, + FK ไป master (Tier 1)</td></tr>
+      <tr><td><code>OrderPlan</code> (eMAR)</td><td><code>TB_IPD_ORDER_PLANS</code>, <code>TB_IPD_ORDER_PLAN_SCHEDULES</code>, <code>TB_IPD_ORDER_PLAN_ACTIVITIES</code></td><td>OrderNoteDetail + AdmitId</td></tr>
+      <tr><td><code>DoctorProblem</code></td><td><code>TB_IPD_DOCTOR_PROBLEMS</code>, <code>TB_IPD_DOCTOR_NOTE_PROBLEMS</code></td><td>AdmitId, PatientId</td></tr>
+      <tr><td><code>IpdAdmissionRecord</code></td><td><code>TB_IPD_ADMISSION_RECORDS</code> (+ ~11 extension tables)</td><td>AdmitId, WardId, AdmitWardId</td></tr>
+      <tr><td><code>IpdHistoryPhysical</code></td><td><code>TB_IPD_HISTORY_PHYSICALS</code> (+ problem)</td><td>AdmitId, DoctorId</td></tr>
+      <tr><td><code>IpdPreDiagnosis</code></td><td><code>TB_IPD_PRE_DIAGS</code> (+ <code>TB_IPD_DIAGS</code>, <code>TB_IPD_PROCEDURES</code>)</td><td>AdmitId + ICD master</td></tr>
+      <tr><td><code>DischargeSummary</code></td><td><code>TB_IPD_DISCHARGE_SUMMARIES</code></td><td>AdmitId + discharge master</td></tr>
+      <tr><td><code>IntakeOutput/records</code></td><td><code>TB_IPD_INTAKE_OUTPUT_RECORDS</code></td><td>AdmitId + Tier 1 master</td></tr>
+      <tr><td><code>MedReconcile</code></td><td><code>TB_IPD_MED_RECONCILE</code> (+ item/signature/audit)</td><td>AdmitId</td></tr>
+      <tr><td><code>MedicationDispensing</code>, <code>PharmacistDispensing</code></td><td><code>TB_IPD_DISPENSING_REQUEST</code>, <code>TB_IPD_DISPENSING_VERIFICATION</code></td><td><strong>ผูกแน่นสุด:</strong> AdmitId + OrderNoteDetail + <code>TB_DRUG_PROFILES</code> + <code>TB_FINANCES</code></td></tr>
+    </tbody>
+  </table>
+  <h3>กลยุทธ์การแยก (Tier 2)</h3>
+  <ul>
+    <li>ย้ายตาราง <code>TB_IPD_*</code> ไปไว้ในฐานข้อมูล Smart IPD (<code>haos_smartipd</code>)</li>
+    <li>เก็บการอ้างอิงแกน HIS เป็น <strong>ค่าอ้างอิง (AN / AdmitId / PatientId / UserId)</strong> ไม่ใช่ DB-level FK ข้ามฐาน</li>
+    <li>ดึงบริบทผู้ป่วย (ชื่อ/ward/แพทย์) จาก HAOS <strong>แบบอ่านอย่างเดียว</strong> ตอนแสดงผล</li>
+    <li>⚠️ <code>Dispensing</code> ผูกกับ <code>TB_FINANCES</code> (billing) — เชื่อมระบบการเงิน ควรแยกเป็นเฟสท้าย ๆ</li>
+  </ul>
+  <p><strong>ผลที่ได้:</strong> endpoints กลุ่ม <code>clinical_documentation</code> + <code>orders_and_care_plan</code> ส่วนใหญ่ (&gt;150 เส้น) เปลี่ยนเป็น local ได้ &nbsp;·&nbsp; <strong>ความเสี่ยง:</strong> <span style="color:var(--t2);font-weight:600">ปานกลาง</span></p>
+
+  <div class="tier-head r"><span class="dot"></span><h3><span class="pill t3">Tier 3</span> ยึดไม่ได้ ต้องอยู่กับ HAOS ต่อ — แกนกลาง HIS</h3></div>
+  <p>ข้อมูลแกนกลางของโรงพยาบาล ใช้ร่วมกับ OPD/ER/Pharmacy/Billing — Smart IPD ควรเป็นแค่ "ผู้บริโภค" ผ่าน HAOS API</p>
+  <table>
+    <thead><tr><th>API group</th><th>เหตุผลที่ต้องอยู่กับ HAOS</th></tr></thead>
+    <tbody>
+      <tr><td><code>patient_and_admission</code> (Patient, admit, transfer)</td><td><code>TB_PATIENTS</code>/<code>TB_ADMITS</code> = แกนกลาง ผู้ป่วยคนเดียวใช้ทั้ง OPD/IPD</td></tr>
+      <tr><td><code>appointment</code></td><td>ระบบนัดหมายระดับโรงพยาบาล</td></tr>
+      <tr><td><code>master_data</code> (wards, ICD, drug master, routes)</td><td>catalog กลาง คุมจากส่วนกลาง</td></tr>
+      <tr><td><code>medication</code> (search/master/template/interactions)</td><td>drug master + DI ต้องเป็น single source</td></tr>
+      <tr><td><code>lab</code>, <code>xray</code> (catalog + ผลตรวจ)</td><td>ผลตรวจมาจากระบบ LIS/RIS/PACS</td></tr>
+      <tr><td><code>vital_signs</code></td><td><code>TB_VITAL_SIGNS</code> เป็นตารางแกน HIS (ไม่ใช่ <code>TB_IPD_*</code>)</td></tr>
+      <tr><td><code>user_lookup</code> (doctors/nurses)</td><td>directory บุคลากรกลาง</td></tr>
+      <tr><td><code>MedicalCertificate</code></td><td>เอกสารราชการผูกระบบ OPD/IPD</td></tr>
+      <tr><td>finance/expense (expense-summary)</td><td>ระบบการเงินกลาง</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 6 ============ -->
+<section id="s6">
+  <h2 class="sec">6. สรุปแผนเชิงปฏิบัติ (Recommended Roadmap)</h2>
+  <table>
+    <thead><tr><th>เฟส</th><th>ขอบเขต</th><th>ความเสี่ยง</th><th>ผลลัพธ์</th></tr></thead>
+    <tbody>
+      <tr><td><strong>เฟส 1</strong></td><td>ย้าย <code>TBM_IPD_*</code> (Tier 1) + <code>TB_PATIENT_TAGS</code> เข้า <code>haos_smartipd</code></td><td><span class="pill t1">ต่ำ</span></td><td>เลิกพึ่ง HAOS API: FAIE master data + I/O master + tags</td></tr>
+      <tr><td><strong>เฟส 2</strong></td><td>ย้ายเอกสารคลินิกที่ผูกแค่ AdmitId/UserId (DoctorNotes, NurseNotes, FocusItems, NursingRecord, AdmissionRecord, HistoryPhysical, DischargeSummary)</td><td><span class="pill t2">ปานกลาง</span></td><td>กลุ่ม <code>clinical_documentation</code> เป็น local</td></tr>
+      <tr><td><strong>เฟส 3</strong></td><td>ย้าย OrderNote / OrderPlan(eMAR) / IntakeOutput records</td><td><span class="pill t2">ปานกลาง–สูง</span></td><td>กลุ่ม <code>orders_and_care_plan</code> เป็น local</td></tr>
+      <tr><td><strong>เฟส 4</strong></td><td>Dispensing / MedReconcile (ผูก billing/drug master)</td><td><span class="pill t3">สูง</span></td><td>พิจารณารายกรณี — อาจคงเชื่อม HAOS บางส่วน</td></tr>
+      <tr><td><strong>ไม่ทำ</strong></td><td>Tier 3 ทั้งหมด</td><td>–</td><td>คงเรียกผ่าน HAOS API</td></tr>
+    </tbody>
+  </table>
+  <h3>สิ่งที่ต้องทำควบคู่ทุกเฟส</h3>
+  <ol>
+    <li>ออกแบบ "anti-corruption layer" สำหรับอ่านบริบทผู้ป่วยจาก HAOS (อ่านอย่างเดียว)</li>
+    <li>แทน DB-level FK ข้ามฐานด้วย reference value + validation ที่ระดับ application</li>
+    <li>วางแผน migration ข้อมูลเดิมใน <code>TB_IPD_*</code> ออกจาก HAOS DB</li>
+    <li>ทบทวน <code>HaosDatabaseService</code> ว่า query ตรงเส้นไหนเป็น <code>TB_IPD_*</code> (ยึดได้) vs <code>TB_*</code> แกนกลาง (ยึดไม่ได้)</li>
+  </ol>
+</section>
+
+<!-- ============ A1 ============ -->
+<section id="a1">
+  <h2 class="sec">ภาคผนวก A — ตาราง IPD ในฐานข้อมูล HAOS (รายการเต็ม)</h2>
+  <p>location: <code>Ayodia.PanaceaHS.DAL/Entities/</code> &nbsp;·&nbsp; DbContext: <code>Ayodia.PanaceaHS.DAL/PanaceaHSContext.cs</code> (รวม DbSet ของ IPD ~70 รายการ — ยังไม่มี bounded-context แยก)</p>
+
+  <h3><span class="pill t1">Tier 1</span> Master / Config — <code>TBM_IPD_*</code> (~22 ตาราง)</h3>
+  <table>
+    <thead><tr><th>ตาราง</th><th>หน้าที่</th><th>โฟลเดอร์</th></tr></thead>
+    <tbody>
+      <tr><td><code>TBM_IPD_FOCUSES</code></td><td>master รายการ focus การพยาบาล (auto FocusCode)</td><td>FAIE/MasterData</td></tr>
+      <tr><td><code>TBM_IPD_FOCUS_CATEGORIES</code></td><td>หมวดของ focus</td><td>FAIE/MasterData</td></tr>
+      <tr><td><code>TBM_IPD_FOCUS_SUBTYPES</code></td><td>subtype ภายในหมวด focus</td><td>FAIE/MasterData</td></tr>
+      <tr><td><code>TBM_IPD_ASSESSMENTS</code></td><td>template การประเมิน (auto AssessmentCode)</td><td>FAIE/MasterData</td></tr>
+      <tr><td><code>TBM_IPD_ASSESSMENT_ABNORMAL_FINDINGS</code></td><td>ตัวเลือกผลผิดปกติของ assessment</td><td>FAIE/MasterData</td></tr>
+      <tr><td><code>TBM_IPD_INTERVENTIONS</code></td><td>template กิจกรรมการพยาบาล</td><td>FAIE/MasterData</td></tr>
+      <tr><td><code>TBM_IPD_EXPECTED_OUTCOMES</code></td><td>ผลลัพธ์ที่คาดหวัง</td><td>FAIE/MasterData</td></tr>
+      <tr><td><code>TBM_IPD_NURSE_NOTE_TEMPLATES</code></td><td>template บันทึกพยาบาล (มี versioning)</td><td>FAIE/MasterData</td></tr>
+      <tr><td><code>TBM_IPD_NURSE_NOTE_TEMPLATE_ASSESSMENTS</code></td><td>link template ↔ assessment</td><td>FAIE/MasterData</td></tr>
+      <tr><td><code>TBM_IPD_NURSE_NOTE_TEMPLATE_INTERVENTIONS</code></td><td>link template ↔ intervention</td><td>FAIE/MasterData</td></tr>
+      <tr><td><code>TBM_IPD_NURSE_NOTE_TEMPLATE_EXPECTED_OUTCOMES</code></td><td>link template ↔ expected outcome</td><td>FAIE/MasterData</td></tr>
+      <tr><td><code>TBM_IPD_INTAKE</code></td><td>master ประเภท intake (น้ำ/อาหาร)</td><td>IntakeOutput</td></tr>
+      <tr><td><code>TBM_IPD_OUTPUT</code></td><td>master ประเภท output (ปัสสาวะ/drainage)</td><td>IntakeOutput</td></tr>
+      <tr><td colspan="3"><em>+ audit logs:</em> <code>TBM_IPD_FOCUS_LOGS</code>, <code>TBM_IPD_FOCUS_CATEGORY_LOGS</code>, <code>TBM_IPD_FOCUS_SUBTYPE_LOGS</code>, <code>TBM_IPD_ASSESSMENT_LOGS</code>, <code>TBM_IPD_INTERVENTION_LOGS</code>, <code>TBM_IPD_EXPECTED_OUTCOME_LOGS</code>, <code>TBM_IPD_NURSE_NOTE_TEMPLATE_LOGS</code>, <code>TBM_IPD_INTAKE_LOGS</code>, <code>TBM_IPD_OUTPUT_LOGS</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="pill t2">Tier 2</span> Transactional — <code>TB_IPD_*</code> (~33 ตาราง)</h3>
+  <table>
+    <thead><tr><th>กลุ่ม</th><th>ตาราง</th><th>ผูกแกน HIS</th></tr></thead>
+    <tbody>
+      <tr><td>Admission</td><td><code>TB_IPD_ADMISSION_RECORDS</code> + 11 extension (general, profile, health-env, chief-complaint, personal/family-history, abnormal-finding, contact, ph-allergy, ph-accident, ph-icd10)</td><td>AdmitId, WardId, AdmitWardId</td></tr>
+      <tr><td>Diagnosis</td><td><code>TB_IPD_DIAGS</code>, <code>TB_IPD_DOC_DIAGS</code>, <code>TB_IPD_PRE_DIAGS</code>, <code>TB_IPD_PROCEDURES</code></td><td>AdmitId, PatientId, Doctor, ICD/organ/side master</td></tr>
+      <tr><td>History &amp; Physical</td><td><code>TB_IPD_HISTORY_PHYSICALS</code>, <code>TB_IPD_HISTORY_PHYSICALS_PROBLEM</code></td><td>AdmitId, DoctorId</td></tr>
+      <tr><td>Discharge</td><td><code>TB_IPD_DISCHARGE_SUMMARIES</code></td><td>AdmitId + discharge master</td></tr>
+      <tr><td>Card/Transfer</td><td><code>TB_IPD_CARDS</code></td><td>AdmitId, PatientId, ward FK</td></tr>
+      <tr><td>Doctor Notes</td><td><code>TB_IPD_DOCTOR_NOTES</code>, <code>TB_IPD_DOCTOR_NOTE_CANVAS</code>, <code>TB_IPD_DOCTOR_NOTE_PROBLEMS</code>, <code>TB_IPD_DOCTOR_PROBLEMS</code>, <code>TB_IPD_DOCTOR_NOTE_ACTIVITY_LOG</code></td><td>PatientId, AdmitId, DoctorId</td></tr>
+      <tr><td>Nurse Notes</td><td><code>TB_IPD_NURSE_NOTES</code>, <code>TB_IPD_NURSE_FOCUS_ITEM</code></td><td>AdmitId, NurseId, FocusItem</td></tr>
+      <tr><td>Orders</td><td><code>TB_IPD_ORDER_NOTES</code>, <code>TB_IPD_ORDER_NOTE_DETAILS</code>, <code>TB_IPD_ORDER_HOLD_LOGS</code>, <code>TB_IPD_ORDER_ACTIVITY_LOGS</code></td><td>AdmitId, DoctorId, workflow users</td></tr>
+      <tr><td>eMAR</td><td><code>TB_IPD_ORDER_PLANS</code>, <code>TB_IPD_ORDER_PLAN_SCHEDULES</code>, <code>TB_IPD_ORDER_PLAN_ACTIVITIES</code></td><td>OrderNoteDetail, AdmitId, Nurse/Witness</td></tr>
+      <tr><td>Nursing Care Plan</td><td><code>TB_IPD_PATIENT_NURSING_CARE_PLANS</code> (+expected-outcomes), <code>TB_IPD_PATIENT_NURSING_PROGRESS_NOTES</code> (+assessments/interventions/expected-outcomes)</td><td>AdmitId + master (Tier 1)</td></tr>
+      <tr><td>Intake/Output</td><td><code>TB_IPD_INTAKE_OUTPUT_RECORDS</code></td><td>AdmitId + I/O master</td></tr>
+      <tr><td>Pharmacy</td><td><code>TB_IPD_DISPENSING_REQUEST</code>, <code>TB_IPD_DISPENSING_VERIFICATION</code>, <code>TB_IPD_MED_RECONCILE</code> (+item/signature/audit-log)</td><td><strong>แน่นสุด:</strong> AdmitId, OrderNoteDetail, DrugProfile, Finance</td></tr>
+      <tr><td>Finance ref</td><td><code>TB_REF_FINANCES_IPD_RIGHTS</code></td><td>FinanceId, AdmitRightId, Rights master</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ A2 ============ -->
+<section id="a2">
+  <h2 class="sec">ภาคผนวก B — Local DB ของ Smart IPD ปัจจุบัน</h2>
+  <p><code>haos_smartipd</code> (ConnectionStrings:DefaultConnection) มีเพียง:</p>
+  <table>
+    <thead><tr><th>Entity</th><th>ไฟล์</th><th>หน้าที่</th></tr></thead>
+    <tbody>
+      <tr><td><code>Users</code></td><td><code>HAOS.SmartIPD.Domain/Entities/User.cs</code></td><td>บัญชีผู้ใช้ Smart IPD (local auth user)</td></tr>
+      <tr><td><code>UserAccounts</code></td><td><code>HAOS.SmartIPD.Domain/Entities/UserAccount.cs</code></td><td>บัญชี auth provider (ExternalId, PasswordHash, Provider)</td></tr>
+      <tr><td><code>RefreshTokens</code></td><td><code>HAOS.SmartIPD.Domain/Entities/RefreshToken.cs</code></td><td>จัดการ JWT refresh token / session</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn">
+    <p>ทั้งหมดเป็นเรื่อง authentication/session เท่านั้น — <strong>ยังไม่มีข้อมูลคลินิกใด ๆ เป็นของ Smart IPD</strong></p>
+  </div>
+</section>
+
+<footer>
+  เอกสารวิเคราะห์ Smart IPD API &amp; Data Ownership — สร้างจากการตรวจสอบ codebase จริง (ayodia-haos-smart-ipd + top-panacea)
+</footer>
+
+</div>
+</body>
+</html>

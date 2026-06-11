@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart IPD — คู่มือเตรียมความพร้อมเชื่อมต่อสำหรับทีม HIS</title>
+<style>
+  :root{
+    --bg:#f4f7fb; --card:#fff; --ink:#1f2733; --muted:#5b6675; --line:#dde3ea;
+    --brand:#0a6cf1; --brand2:#0a8f7f; --own:#137a3f; --ownbg:#e7f6ec; --need:#1763c6; --needbg:#e6f0fc;
+    --ch1:#7b3fe4; --ch1bg:#f1eafd; --ch2:#1763c6; --ch2bg:#e6f0fc; --ch3:#0a8f7f; --ch3bg:#e0f6f2;
+    --must:#c4322b; --mustbg:#fdecea; --opt:#5b6675; --optbg:#eef1f4;
+    --warn:#9a6a00; --warnbg:#fff6df;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Segoe UI","Sarabun","Noto Sans Thai",Tahoma,sans-serif; line-height:1.75; font-size:15.5px;}
+  .wrap{max-width:1080px; margin:0 auto; padding:34px 20px 90px;}
+
+  header.doc{background:linear-gradient(135deg,#0a6cf1,#0a8f7f); color:#fff;
+    border-radius:16px; padding:34px 38px; margin-bottom:26px; box-shadow:0 6px 22px rgba(10,108,241,.22);}
+  header.doc .kicker{font-size:13px; letter-spacing:.08em; text-transform:uppercase; opacity:.9;}
+  header.doc h1{margin:6px 0 10px; font-size:28px;}
+  header.doc p{margin:6px 0; opacity:.95; font-size:15px;}
+  header.doc .who{margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;}
+  header.doc .who span{background:rgba(255,255,255,.18); padding:5px 14px; border-radius:20px; font-size:13px;}
+
+  nav.toc{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 26px; margin-bottom:26px;}
+  nav.toc h2{margin:0 0 8px; font-size:15px; color:var(--muted); letter-spacing:.02em;}
+  nav.toc ol{margin:0; padding-left:22px; columns:2; column-gap:36px;}
+  nav.toc a{color:var(--need); text-decoration:none;} nav.toc a:hover{text-decoration:underline;}
+
+  section{background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:26px 30px; margin-bottom:24px; box-shadow:0 1px 4px rgba(0,0,0,.04);}
+  h2.sec{margin:0 0 14px; font-size:22px; padding-bottom:12px; border-bottom:2px solid var(--line); display:flex; align-items:center; gap:10px;}
+  h3{font-size:18px; margin:22px 0 10px;}
+  h4{font-size:15px; margin:14px 0 6px; color:var(--muted);}
+  p{margin:10px 0;} ul{margin:8px 0; padding-left:22px;} li{margin:6px 0;}
+  strong{color:#000;}
+  .lead{font-size:16.5px; color:var(--muted);}
+
+  .pill{display:inline-block; padding:2px 11px; border-radius:20px; font-size:12.5px; font-weight:700; white-space:nowrap;}
+  .own{background:var(--ownbg); color:var(--own);} .need{background:var(--needbg); color:var(--need);}
+  .ch1{background:var(--ch1bg); color:var(--ch1);} .ch2{background:var(--ch2bg); color:var(--ch2);} .ch3{background:var(--ch3bg); color:var(--ch3);}
+  .must{background:var(--mustbg); color:var(--must); font-weight:800;} .opt{background:var(--optbg); color:var(--opt);}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13.5px;}
+  th,td{border:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:top;}
+  th{background:#eef3f9; font-weight:700;}
+  tbody tr:nth-child(even){background:#fafcfe;}
+
+  .split{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:18px 0;}
+  .colbox{border-radius:14px; padding:20px 22px; border:1px solid;}
+  .colbox.own{background:var(--ownbg); border-color:#aee0bd;} .colbox.need{background:var(--needbg); border-color:#b9d4f7;}
+  .colbox h3{margin:0 0 6px; font-size:18px;} .colbox.own h3{color:var(--own);} .colbox.need h3{color:var(--need);}
+  .colbox .sub{font-size:13.5px; color:var(--muted); margin-bottom:10px;} .colbox ul{padding-left:20px;} .colbox li{margin:7px 0;}
+
+  .channel{border-left:6px solid; border-radius:10px; padding:16px 20px; margin:16px 0; background:#fcfdfe;}
+  .channel.c1{border-color:var(--ch1);} .channel.c2{border-color:var(--ch2);} .channel.c3{border-color:var(--ch3);}
+  .channel h4{margin:0 0 4px; font-size:17px; color:var(--ink);}
+  .channel .prep{background:#fff; border:1px dashed #cfd8e3; border-radius:8px; padding:8px 12px; margin-top:8px; font-size:13.5px;}
+
+  .callout{border-radius:12px; padding:16px 20px; margin:18px 0; border:1px solid;}
+  .callout.key{background:var(--needbg); border-color:#9cc3f2;}
+  .callout.good{background:var(--ownbg); border-color:#aee0bd;}
+  .callout.warn{background:var(--warnbg); border-color:#e3c373;}
+  .callout .lbl{font-weight:800; display:block; margin-bottom:4px;}
+  .callout p:first-child{margin-top:0;} .callout p:last-child{margin-bottom:0;}
+
+  .flow{background:#0f1b2d; color:#cfe0f5; border-radius:12px; padding:20px 24px; margin:16px 0;
+    font-family:"Cascadia Code",Consolas,monospace; font-size:12.5px; line-height:1.6; white-space:pre; overflow-x:auto;}
+  .legend{display:flex; gap:18px; flex-wrap:wrap; margin:14px 0; font-size:13.5px;}
+  .legend span{display:flex; align-items:center; gap:7px;}
+
+  /* ===== relationship diagram ===== */
+  .diagram{margin:20px 0 6px;}
+  .dgbox{border-radius:16px; padding:18px 24px; border:2px solid; text-align:center; box-shadow:0 3px 10px rgba(20,40,80,.06);}
+  .dgbox.ipd{background:linear-gradient(135deg,#ecfaf1,#d8f1e2); border-color:#8fd4a8;}
+  .dgbox.his{background:linear-gradient(135deg,#eaf2fd,#d6e7fc); border-color:#9cc1f0;}
+  .dgbox .dgttl{font-weight:800; font-size:17px; margin-bottom:5px;}
+  .dgbox.ipd .dgttl{color:var(--own);} .dgbox.his .dgttl{color:var(--need);}
+  .dgbox .dgttl small{font-weight:600; font-size:13px; opacity:.8;}
+  .dgbox .dgitems{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:4px;}
+  .dgbox .dgitems b{background:rgba(255,255,255,.7); border:1px solid rgba(0,0,0,.06); border-radius:20px; padding:4px 13px; font-size:13px; font-weight:600; color:var(--ink);}
+  .dgbox .dgnote{margin-top:10px; font-size:13px; font-weight:700;}
+  .dgbox.his .dgnote{color:var(--need);}
+
+  .dgconn{display:grid; grid-template-columns:1fr 1fr; gap:40px; padding:4px 12% 0;}
+  .dgarrow{display:flex; flex-direction:column; align-items:center;}
+  .dgarrow .albl{font-size:13px; font-weight:700; padding:6px 14px; border-radius:20px; white-space:nowrap; box-shadow:0 2px 5px rgba(20,40,80,.08);}
+  .dgarrow.read .albl{background:var(--needbg); color:var(--need);}
+  .dgarrow.write .albl{background:var(--ownbg); color:var(--own);}
+  .dgarrow .stem{width:4px; height:20px;}
+  .dgarrow.read .stem{background:linear-gradient(180deg,#9cc1f0,#1763c6);}
+  .dgarrow.write .stem{background:linear-gradient(0deg,#8fd4a8,#137a3f);}
+  .tri-down{width:0; height:0; border-left:10px solid transparent; border-right:10px solid transparent; border-top:14px solid var(--need);}
+  .tri-down-own{width:0; height:0; border-left:10px solid transparent; border-right:10px solid transparent; border-top:14px solid var(--own);}
+  @media(max-width:760px){ .dgconn{padding:4px 4% 0; gap:18px;} .dgbox .dgitems b{font-size:12px;} }
+
+  /* checklist */
+  .check{list-style:none; margin:10px 0; padding:0;}
+  .check li{position:relative; padding:9px 12px 9px 40px; margin:6px 0; border:1px solid var(--line); border-radius:10px; background:#fcfdfe; font-size:14px;}
+  .check li::before{content:'☐'; position:absolute; left:12px; top:8px; font-size:18px; color:var(--brand);}
+  .check li b{color:#000;}
+
+  /* steps timeline (process) */
+  .proc{counter-reset:p; list-style:none; margin:14px 0; padding:0;}
+  .proc li{position:relative; padding:10px 14px 10px 50px; margin:8px 0; border:1px solid var(--line); border-radius:10px; background:#fcfdfe; font-size:14px;}
+  .proc li::before{counter-increment:p; content:counter(p); position:absolute; left:12px; top:50%; transform:translateY(-50%);
+    width:26px; height:26px; border-radius:50%; background:var(--brand); color:#fff; font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center;}
+  .proc li .actor{font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; padding:1px 8px; border-radius:12px; margin-right:6px;}
+  .proc li .a-his{background:var(--needbg); color:var(--need);} .proc li .a-ipd{background:var(--ownbg); color:var(--own);} .proc li .a-both{background:#eee6fb; color:#6a35c9;}
+
+  footer{text-align:center; color:var(--muted); font-size:13px; margin-top:32px;}
+  @media print{ body{background:#fff;} section,nav.toc,header.doc{box-shadow:none;} nav.toc ol,.split{columns:1; grid-template-columns:1fr;} section,.channel,.check li{break-inside:avoid;} }
+  @media(max-width:760px){ .split{grid-template-columns:1fr;} nav.toc ol{columns:1;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="doc">
+  <div class="kicker">HIS Integration · Partner Onboarding Guide</div>
+  <h1>เชื่อมต่อ HIS ของคุณกับ Smart IPD</h1>
+  <p>คู่มือสำหรับทีม HIS — ทำความเข้าใจว่า Smart IPD คืออะไร ทำงานอย่างไร และ <strong>ทีม HIS ต้องเตรียม/จัดให้อะไรบ้าง</strong> เพื่อเชื่อมต่อ</p>
+  <div class="who">
+    <span>👥 ผู้อ่าน: ทีมพัฒนา/ผู้ดูแลระบบ HIS</span>
+    <span>🎯 เป้าหมาย: รู้ชัดว่า "ต้องเตรียมอะไร"</span>
+    <span>🤝 ฝั่ง Smart IPD เป็นคนพัฒนาตัวเชื่อม</span>
+  </div>
+  <div style="margin-top:14px; font-size:12.5px; opacity:.88; border-top:1px solid rgba(255,255,255,.25); padding-top:12px;">
+    เวอร์ชัน 1.0 · ปรับปรุง 11 มิถุนายน 2026 · จัดทำโดย [ชื่อทีม/บริษัท Smart IPD] · ดูข้อมูลติดต่อท้ายเอกสาร
+  </div>
+</header>
+
+<nav class="toc">
+  <h2>หัวข้อ</h2>
+  <ol>
+    <li><a href="#s1">1. Smart IPD คืออะไร</a></li>
+    <li><a href="#s2">2. หลักการเชื่อมต่อ</a></li>
+    <li><a href="#s3">3. แบ่งงานกันอย่างไร (ใครทำอะไร)</a></li>
+    <li><a href="#s4">4. 3 ช่องทางให้ HIS เลือกจัดให้</a></li>
+    <li><a href="#s5">5. ★ สิ่งที่ HIS ต้องจัดให้ (รายการข้อมูล)</a></li>
+    <li><a href="#s6">6. รหัสอ้างอิงที่ต้องเปิดให้</a></li>
+    <li><a href="#s7">7. สิ่งที่ Smart IPD จะส่งกลับเข้า HIS</a></li>
+    <li><a href="#s8">8. ความปลอดภัย / สภาพแวดล้อม / อื่น ๆ</a></li>
+    <li><a href="#s9">9. ขั้นตอนการเชื่อมต่อ (ไทม์ไลน์)</a></li>
+    <li><a href="#s10">10. ★ Checklist ความพร้อมของ HIS</a></li>
+    <li><a href="#contact">11. ติดต่อ &amp; ขั้นตอนถัดไป</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="s1">
+  <h2 class="sec">🏥 1. Smart IPD คืออะไร</h2>
+  <p class="lead">Smart IPD เป็นระบบงาน<strong>ผู้ป่วยใน (IPD)</strong> — ดูแลตั้งแต่รับผู้ป่วยเข้านอน บันทึกการรักษา สั่งยา/แล็บ/เอกซเรย์ บริหารยา (eMAR) ไปจนถึงสรุปจำหน่าย</p>
+  <p>Smart IPD เป็น <strong>"สมุดบันทึกทางคลินิกของผู้ป่วยใน"</strong> ที่ทำงานครบในตัวเอง แต่ต้องการ<strong>ข้อมูลพื้นฐานของโรงพยาบาลจาก HIS</strong> (ตัวผู้ป่วย ยา ผลตรวจ ฯลฯ) และต้อง<strong>ส่งคำสั่ง/ค่าใช้จ่ายกลับเข้า HIS</strong></p>
+  <div class="callout key">
+    <span class="lbl">สรุปความสัมพันธ์</span>
+    <p>Smart IPD <strong>ไม่แทนที่ HIS</strong> — แต่มาเสริมงานผู้ป่วยใน โดย HIS ยังเป็น "ระบบกลาง/ระบบหลัก" ของโรงพยาบาล (ผู้ป่วย ยา การเงิน เวชระเบียน). ทั้งสองทำงานร่วมกันผ่านการเชื่อมต่อที่อธิบายในเอกสารนี้</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="s2">
+  <h2 class="sec">🔗 2. หลักการเชื่อมต่อ</h2>
+  <p class="lead">การเชื่อมต่อยึดหลัก 3 ข้อ ที่ทำให้ Smart IPD ทำงานร่วมกับ HIS เจ้าใดก็ได้:</p>
+  <ol style="margin:10px 0 20px; padding-left:22px;">
+    <li><strong>Smart IPD เป็นเจ้าของ "เนื้อหาการดูแลผู้ป่วยใน" ทั้งหมด</strong> — บันทึกการรักษา คำสั่ง การบริหารยา ฯลฯ ถูกเก็บไว้ในระบบ/ฐานข้อมูลของ Smart IPD เอง ไม่ได้ฝากไว้ใน HIS</li>
+    <li><strong>HIS เป็น "ระบบกลาง/ระบบหลัก" ของโรงพยาบาล</strong> — ทำหน้าที่ให้ข้อมูลพื้นฐาน (ตัวผู้ป่วย ยา ผลตรวจ บุคลากร) และรับคำสั่ง/ค่าใช้จ่ายที่ Smart IPD ส่งกลับ ไปประมวลผลต่อ (ห้องยา/ห้องแล็บ/การเงิน)</li>
+    <li><strong>เชื่อมกันผ่าน "จุดเชื่อมต่อมาตรฐานจุดเดียว"</strong> — สิ่งที่ Smart IPD ต้องการจาก HIS ถูกนิยามเป็นรายการชัดเจน (ข้อ 5) และ HIS เลือกได้ว่าจะจัดให้ผ่านช่องทางไหน (ข้อ 4) ตามความพร้อมจริง</li>
+  </ol>
+
+  <h3>แบ่งความรับผิดชอบข้อมูลให้ชัดเจน</h3>
+  <div class="split">
+    <div class="colbox own">
+      <h3>✅ Smart IPD เก็บ / ทำเอง</h3>
+      <div class="sub">ข้อมูลและงานที่เกิดและใช้เฉพาะตอนผู้ป่วยนอนโรงพยาบาล — <strong>HIS ไม่ต้องเตรียมส่วนนี้</strong></div>
+      <ul>
+        <li><strong>บันทึกการรับผู้ป่วยใหม่</strong> — ซักประวัติ ตรวจร่างกาย ประวัติแพ้ยา/ครอบครัว สภาพแวดล้อม</li>
+        <li><strong>บันทึกแพทย์ &amp; รายการปัญหา</strong> — progress note (SOAP/บรรยาย) พร้อมภาพประกอบ</li>
+        <li><strong>บันทึกพยาบาล &amp; แผนการพยาบาล</strong> — รูปแบบ DAR + คลังแม่แบบงานพยาบาล (FAIE)</li>
+        <li><strong>คำสั่งการรักษา (ใบคำสั่งต้นฉบับ)</strong> — ยา/แล็บ/เอกซเรย์/ทั่วไป + สถานะภายใน IPD</li>
+        <li><strong>ตารางการบริหารยา (eMAR)</strong> — ใครให้ยาเมื่อไหร่ ให้/งด/เลื่อน พร้อมพยานยืนยัน</li>
+        <li><strong>ทบทวนรายการยา · บันทึกน้ำเข้า-ออก · สรุปการจำหน่าย</strong></li>
+        <li><strong>ผู้ช่วยอัจฉริยะ (AI) · ป้ายกำกับผู้ป่วย · ออกรายงาน/PDF</strong></li>
+      </ul>
+    </div>
+    <div class="colbox need">
+      <h3>📥 Smart IPD ขอจาก HIS</h3>
+      <div class="sub">★ ข้อมูลกลางของโรงพยาบาล — <strong>ส่วนนี้คือสิ่งที่ทีม HIS ต้องจัดให้</strong> (รายละเอียดข้อ 5)</div>
+      <ul>
+        <li><strong>รายชื่อผู้ป่วยที่นอนอยู่</strong> — พร้อม HN/AN, วอร์ด/เตียง, แพทย์เจ้าของไข้</li>
+        <li><strong>ข้อมูลตัวผู้ป่วย</strong> — ชื่อ-สกุล อายุ เพศ สิทธิการรักษา ประวัติแพ้ยา</li>
+        <li><strong>เหตุการณ์ผู้ป่วย</strong> — รับเข้า (Admit) / ย้ายวอร์ด-เตียง / จำหน่าย</li>
+        <li><strong>บัญชีรายการกลาง</strong> — ยา, แล็บ, เอกซเรย์, รหัสโรค (ICD), วอร์ด/เตียง</li>
+        <li><strong>ทำเนียบบุคลากร</strong> — แพทย์ / พยาบาล / เภสัชกร</li>
+        <li><strong>ผลตรวจ</strong> — ผลแล็บ, ผลเอกซเรย์ + ภาพถ่ายรังสี (PACS)</li>
+        <li><strong>รับคำสั่งที่ส่งกลับ</strong> — คำสั่งยา/แล็บ/เอกซเรย์ + การจ่ายยา/ค่าใช้จ่าย</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>ภาพรวมการเชื่อมต่อ</h3>
+  <div class="diagram">
+    <div class="dgbox ipd">
+      <div class="dgttl">✅ Smart IPD <small>— ระบบงานผู้ป่วยใน (เก็บข้อมูลเอง)</small></div>
+      <div class="dgitems"><b>บันทึกการดูแล</b><b>คำสั่งรักษา</b><b>บริหารยา (eMAR)</b><b>สรุปจำหน่าย</b></div>
+    </div>
+    <div class="dgconn">
+      <div class="dgarrow read">
+        <span class="albl">📥 ขออ่านข้อมูลพื้นฐาน</span>
+        <span class="stem"></span>
+        <span class="tri-down"></span>
+      </div>
+      <div class="dgarrow write">
+        <span class="albl">📤 ส่งคำสั่ง / ค่าใช้จ่ายกลับ</span>
+        <span class="stem"></span>
+        <span class="tri-down-own"></span>
+      </div>
+    </div>
+    <div class="dgbox his">
+      <div class="dgttl">🏥 HIS <small>— ระบบกลางของโรงพยาบาล</small></div>
+      <div class="dgitems"><b>ผู้ป่วย</b><b>รับเข้า/จำหน่าย</b><b>บัญชียา/แล็บ</b><b>ผลตรวจ</b><b>บุคลากร</b><b>การเงิน</b></div>
+      <div class="dgnote">★ HIS เตรียมช่องทางให้เข้าถึงข้อมูลเหล่านี้</div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="s3">
+  <h2 class="sec">🤝 3. แบ่งงานกันอย่างไร</h2>
+  <table>
+    <thead><tr><th>งาน</th><th>ใครรับผิดชอบ</th></tr></thead>
+    <tbody>
+      <tr><td>พัฒนา "ตัวเชื่อม" (connector) ระหว่าง Smart IPD กับ HIS</td><td><span class="pill own">ทีม Smart IPD</span></td></tr>
+      <tr><td><strong>เปิดช่องทาง + จัดเตรียมข้อมูล/สิทธิ์เข้าถึง</strong> (ตามข้อ 4–8)</td><td><span class="pill need">ทีม HIS</span></td></tr>
+      <tr><td>ให้สเปก/เอกสาร: โครงสร้างข้อมูล, รายการ API, ตัวอย่างข้อมูล</td><td><span class="pill need">ทีม HIS</span></td></tr>
+      <tr><td>รับคำสั่งที่ Smart IPD ส่งกลับ และประมวลผลในระบบกลาง (คิดเงิน/ส่งห้องยา)</td><td><span class="pill need">ทีม HIS</span></td></tr>
+      <tr><td>แปลงข้อมูลของ HIS ให้เข้ารูปแบบที่ Smart IPD ใช้</td><td><span class="pill own">ทีม Smart IPD</span></td></tr>
+      <tr><td>ทดสอบร่วม (Conformance / UAT) ก่อนเปิดใช้งาน</td><td><span class="pill own">Smart IPD</span> + <span class="pill need">HIS</span></td></tr>
+    </tbody>
+  </table>
+  <div class="callout good">
+    <p><strong>ข่าวดีสำหรับทีม HIS:</strong> คุณ<strong>ไม่ต้องเขียนโปรแกรมฝั่ง Smart IPD</strong> — หน้าที่หลักของ HIS คือ "เปิดประตูให้เข้าถึงข้อมูล" และ "รับคำสั่งที่ส่งกลับ" เท่านั้น ส่วนการเชื่อมต่อ ทีม Smart IPD เป็นผู้พัฒนา</p>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="s4">
+  <h2 class="sec">🔌 4. สามช่องทางที่ HIS เลือกจัดให้ได้</h2>
+  <p>สำหรับข้อมูลแต่ละอย่าง HIS เลือกได้ว่าจะเปิดช่องทางแบบไหน — <strong>เลือกได้ตามความพร้อมจริง และผสมกันได้</strong> (เช่น อ่านบางอย่างผ่าน DB ส่งคำสั่งผ่าน API)</p>
+  <div class="legend">
+    <span><span class="pill ch1">ช่องทาง 1</span> เปิด DB ให้อ่าน</span>
+    <span><span class="pill ch2">ช่องทาง 2</span> เปิด API ของ HIS</span>
+    <span><span class="pill ch3">ช่องทาง 3</span> HIS ส่งข้อมูลเข้า Smart IPD</span>
+  </div>
+
+  <div class="channel c1">
+    <h4><span class="pill ch1">ช่องทาง 1</span> &nbsp;เปิดฐานข้อมูล (DB) ให้ Smart IPD อ่าน</h4>
+    <p><strong>เหมาะกับ:</strong> ข้อมูลปริมาณมาก/ซับซ้อน หรือ HIS ที่ยังไม่มี API — และใช้กับการ "อ่าน" เท่านั้น</p>
+    <div class="prep"><strong>HIS ต้องเตรียม:</strong> บัญชีผู้ใช้ฐานข้อมูลแบบ <em>อ่านอย่างเดียว (read-only)</em> (แนะนำชี้ไปที่ replica), เอกสารโครงสร้างตาราง/วิว ที่เกี่ยวข้อง, การเปิด network/firewall ให้เข้าถึง</div>
+  </div>
+
+  <div class="channel c2">
+    <h4><span class="pill ch2">ช่องทาง 2</span> &nbsp;เปิดบริการ (API) ของ HIS ให้ Smart IPD เรียก</h4>
+    <p><strong>เหมาะกับ:</strong> การ <strong>ส่งคำสั่งกลับ</strong> (สั่งยา/จ่ายยา) และการอ่านข้อมูลที่ HIS มี API พร้อม</p>
+    <div class="prep"><strong>HIS ต้องเตรียม:</strong> รายการ API + เอกสาร (endpoint, พารามิเตอร์, ตัวอย่าง), วิธียืนยันตัวตน (เช่น OAuth2/API key), URL ของ test &amp; production</div>
+  </div>
+
+  <div class="channel c3">
+    <h4><span class="pill ch3">ช่องทาง 3</span> &nbsp;HIS ส่งข้อมูลเข้ามาที่ Smart IPD</h4>
+    <p><strong>เหมาะกับ:</strong> เหตุการณ์ที่ต้องรู้ทันที — <strong>รับเข้า / ย้ายเตียง / จำหน่าย</strong> และการอัปเดตบัญชีรายการกลางเป็นรอบ ๆ</p>
+    <div class="prep"><strong>HIS ต้องเตรียม:</strong> ความสามารถส่งข้อมูลออก (เช่น HL7 ADT, message queue, หรือเรียก webhook ที่ Smart IPD ให้ไว้) เมื่อมีเหตุการณ์เกิดขึ้น</div>
+  </div>
+
+  <div class="callout warn">
+    <span class="lbl">ถ้า HIS ยังไม่พร้อมช่องทางใดเลยสำหรับข้อมูลบางอย่าง?</span>
+    <p>เริ่มจาก <span class="pill ch1">ช่องทาง 1 (อ่าน DB)</span> ได้ก่อน แล้วค่อยพัฒนาไปสู่ API/Push ภายหลัง — ไม่จำเป็นต้องพร้อมครบทุกช่องทางตั้งแต่วันแรก</p>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="s5">
+  <h2 class="sec">📋 5. สิ่งที่ HIS ต้องจัดให้ (รายการข้อมูล)</h2>
+  <p>นี่คือ "รายการของที่ Smart IPD ต้องการจาก HIS" — <span class="pill must">MUST</span> = จำเป็นเพื่อให้ใช้งานได้ &nbsp; <span class="pill opt">OPT</span> = เสริม. ช่อง "ช่องทางที่จัดได้" คือทางเลือกที่ HIS เปิดให้</p>
+
+  <div class="callout key">
+    <span class="lbl">เป้าหมายขั้นต่ำเพื่อเปิดใช้งาน (Minimum to Go-Live)</span>
+    <p>ต้องจัดข้อมูล <span class="pill must">MUST</span> ทั้งหมดให้ได้ผ่านช่องทางใดก็ได้ — ข้อมูล <span class="pill opt">OPT</span> เพิ่มเข้ามาภายหลังได้</p>
+  </div>
+
+  <h3>5.1 ข้อมูลผู้ป่วย &amp; การรับเข้า</h3>
+  <table>
+    <thead><tr><th>ข้อมูลที่ต้องจัดให้</th><th>Smart IPD เอาไปทำอะไร</th><th>ระดับ</th><th>ช่องทางที่จัดได้</th></tr></thead>
+    <tbody>
+      <tr><td>รายชื่อผู้ป่วยที่นอนอยู่ในแต่ละวอร์ด (พร้อม HN, AN, เตียง, แพทย์เจ้าของไข้)</td><td>กระดานผู้ป่วย / worklist หลัก</td><td><span class="pill must">MUST</span></td><td><span class="pill ch3">3</span> หรือ <span class="pill ch1">1</span>/<span class="pill ch2">2</span></td></tr>
+      <tr><td>ข้อมูลตัวผู้ป่วย: ชื่อ-สกุล, เพศ, วันเกิด/อายุ, สิทธิการรักษา, ประวัติแพ้ยา</td><td>หัวบัตรผู้ป่วย, ความปลอดภัยการสั่งยา</td><td><span class="pill must">MUST</span></td><td><span class="pill ch2">2</span> หรือ <span class="pill ch1">1</span></td></tr>
+      <tr><td>เหตุการณ์ รับเข้า (Admit) / ย้ายวอร์ด-เตียง / จำหน่าย / ยกเลิก</td><td>อัปเดตสถานะผู้ป่วยให้ทันเวลา</td><td><span class="pill must">MUST</span></td><td><span class="pill ch3">3</span> (ดีสุด)</td></tr>
+      <tr><td>ประวัติ OPD/IPD เดิมของผู้ป่วย</td><td>ดูประวัติประกอบการดูแล</td><td><span class="pill opt">OPT</span></td><td><span class="pill ch1">1</span>/<span class="pill ch2">2</span></td></tr>
+      <tr><td>รูปติดบัตรผู้ป่วย</td><td>แสดงในบัตร/รายการจ่ายยา</td><td><span class="pill opt">OPT</span></td><td><span class="pill ch1">1</span>/<span class="pill ch2">2</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 บัญชีรายการกลาง (Master Data)</h3>
+  <table>
+    <thead><tr><th>ข้อมูลที่ต้องจัดให้</th><th>Smart IPD เอาไปทำอะไร</th><th>ระดับ</th><th>ช่องทางที่จัดได้</th></tr></thead>
+    <tbody>
+      <tr><td>บัญชียา (รหัสยา, ชื่อการค้า/สามัญ, รูปแบบ, ความแรง, วิธีใช้, หน่วย, ราคา, คุณสมบัติ เช่น ยาเสี่ยงสูง)</td><td>ค้นหา/เลือกยาตอนสั่ง + ตรวจความปลอดภัย</td><td><span class="pill must">MUST</span></td><td><span class="pill ch3">3 (sync)</span>/<span class="pill ch1">1</span>/<span class="pill ch2">2</span></td></tr>
+      <tr><td>คู่ยาที่ตีกัน / ข้อควรระวังการสั่งยา</td><td>เตือนความปลอดภัยในการสั่งยา</td><td><span class="pill opt">OPT</span></td><td><span class="pill ch1">1</span>/<span class="pill ch2">2</span></td></tr>
+      <tr><td>บัญชีรายการแล็บ (templates) และรายการเอกซเรย์/modality</td><td>เลือกรายการตอนสั่งตรวจ</td><td><span class="pill must">MUST</span></td><td><span class="pill ch1">1</span>/sync</td></tr>
+      <tr><td>รหัสโรค (ICD), ชนิด/ข้างของวินิจฉัย, สถานะ/ประเภทการจำหน่าย</td><td>ลงวินิจฉัย, สรุปจำหน่าย</td><td><span class="pill must">MUST</span></td><td>sync/<span class="pill ch1">1</span></td></tr>
+      <tr><td>วอร์ด, เตียง, ห้อง (lab/xray/ห้องยา)</td><td>จัดที่นอน, เลือกปลายทางคำสั่ง</td><td><span class="pill must">MUST</span></td><td>sync/<span class="pill ch1">1</span></td></tr>
+      <tr><td>หน่วยข้อมูลทั่วไป (สัญชาติ, ศาสนา, สถานภาพ ฯลฯ) สำหรับใบรับผู้ป่วย</td><td>เติมแบบฟอร์มแรกรับ</td><td><span class="pill opt">OPT</span></td><td>sync/<span class="pill ch1">1</span></td></tr>
+      <tr><td>ประเภทสิทธิ/การเงิน (finance types)</td><td>ใช้เมื่อทำงานจ่ายยา/ค่าใช้จ่าย</td><td><span class="pill opt">OPT</span></td><td><span class="pill ch1">1</span>/<span class="pill ch2">2</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.3 บุคลากร</h3>
+  <table>
+    <thead><tr><th>ข้อมูลที่ต้องจัดให้</th><th>Smart IPD เอาไปทำอะไร</th><th>ระดับ</th><th>ช่องทางที่จัดได้</th></tr></thead>
+    <tbody>
+      <tr><td>ทำเนียบแพทย์ (รหัส, ชื่อ, สาขา, เลขใบประกอบ)</td><td>ระบุผู้สั่ง/เจ้าของไข้</td><td><span class="pill must">MUST</span></td><td><span class="pill ch2">2</span>/<span class="pill ch1">1</span></td></tr>
+      <tr><td>ทำเนียบพยาบาล / เภสัชกร</td><td>ระบุผู้ทำรายการ/ผู้ตรวจสอบ</td><td><span class="pill must">MUST</span></td><td><span class="pill ch2">2</span>/<span class="pill ch1">1</span></td></tr>
+      <tr><td>ข้อมูลผู้ใช้สำหรับยืนยันตัวตน (ถ้าต้องการ Single Sign-On กับ HIS)</td><td>ล็อกอินด้วยบัญชีเดียวกับ HIS</td><td><span class="pill opt">OPT</span></td><td><span class="pill ch2">2</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.4 ผลตรวจ</h3>
+  <table>
+    <thead><tr><th>ข้อมูลที่ต้องจัดให้</th><th>Smart IPD เอาไปทำอะไร</th><th>ระดับ</th><th>ช่องทางที่จัดได้</th></tr></thead>
+    <tbody>
+      <tr><td>ผลแล็บ (วันที่, รายการ, ค่า, หน่วย, ค่าอ้างอิง, flag ผิดปกติ)</td><td>ดูผล/เปรียบเทียบผลตรวจ</td><td><span class="pill must">MUST</span></td><td><span class="pill ch1">1</span>/<span class="pill ch2">2</span></td></tr>
+      <tr><td>ผลเอกซเรย์/ภาพ + ลิงก์เปิดภาพใน PACS</td><td>ดูผลและภาพถ่ายรังสี</td><td><span class="pill must">MUST</span></td><td><span class="pill ch2">2</span>/<span class="pill ch1">1</span> + PACS URL</td></tr>
+      <tr><td>สัญญาณชีพ (ถ้า HIS เป็นผู้บันทึก)</td><td>กราฟ/ตารางสัญญาณชีพ</td><td><span class="pill opt">OPT</span>*</td><td><span class="pill ch1">1</span>/<span class="pill ch2">2</span></td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:13px;color:var(--muted)">* ปัจจุบันสัญญาณชีพเริ่มต้นดึงจาก HIS — หาก HIS ไม่มีข้อมูลส่วนนี้ Smart IPD เก็บเองได้ (ไม่ต้องให้ HIS จัด)</p>
+</section>
+
+<!-- 6 -->
+<section id="s6">
+  <h2 class="sec">🔑 6. รหัสอ้างอิงที่ HIS ต้องเปิดให้</h2>
+  <p>Smart IPD เก็บบันทึกการดูแลผู้ป่วยในของตัวเอง แต่ต้อง "อ้างถึง" ข้อมูลของ HIS ได้ — จึงต้องการ<strong>รหัสอ้างอิงที่คงที่และไม่ซ้ำ</strong> ติดมากับข้อมูลที่จัดให้</p>
+  <table>
+    <thead><tr><th>รหัส</th><th>คือ</th><th>ใช้ทำอะไร</th></tr></thead>
+    <tbody>
+      <tr><td><strong>HN</strong> (เลขประจำตัวผู้ป่วย)</td><td>ตัวผู้ป่วย</td><td>ผูกข้อมูลทุกอย่างเข้ากับผู้ป่วยคนเดียวกัน</td></tr>
+      <tr><td><strong>AN</strong> (เลขการรับเข้านอน)</td><td>การ admit หนึ่งครั้ง</td><td>ผูกบันทึก/คำสั่งเข้ากับการนอนครั้งนั้น</td></tr>
+      <tr><td><strong>รหัสบุคลากร</strong> (แพทย์/พยาบาล/เภสัชกร)</td><td>ผู้ทำรายการ</td><td>ระบุว่าใครสั่ง/บันทึก/ตรวจสอบ</td></tr>
+      <tr><td><strong>รหัสยา / รหัสรายการแล็บ-เอกซเรย์</strong></td><td>รายการในบัญชีกลาง</td><td>อ้างอิงตอนสั่งและส่งคำสั่งกลับ</td></tr>
+      <tr><td><strong>รหัสคำสั่ง (Order ID)</strong> ที่ HIS สร้างหลังรับคำสั่ง</td><td>คำสั่งที่ส่งกลับ</td><td>ติดตามสถานะ + กันส่งซ้ำ</td></tr>
+    </tbody>
+  </table>
+  <div class="callout key"><p><strong>หลักสำคัญ:</strong> รหัสเหล่านี้ขอเป็น "ค่าที่ HIS ใช้จริง" ส่งมาตรง ๆ ได้เลย — Smart IPD จะเก็บไว้อ้างอิงโดยไม่ดัดแปลง ทำให้ตรงกับระบบ HIS เสมอ</p></div>
+</section>
+
+<!-- 7 -->
+<section id="s7">
+  <h2 class="sec">📤 7. สิ่งที่ Smart IPD จะส่งกลับเข้า HIS</h2>
+  <p>นอกจากอ่านข้อมูล Smart IPD ยังส่งบางอย่าง<strong>กลับเข้า HIS</strong> — HIS ต้อง<strong>เตรียมรับ</strong>และประมวลผลในระบบกลาง (โดยทั่วไปผ่าน <span class="pill ch2">ช่องทาง 2 · API ของ HIS</span>)</p>
+  <div class="callout key"><p><strong>หมายเหตุ:</strong> Smart IPD เก็บ "ใบคำสั่งต้นฉบับ" ไว้ในระบบของตัวเอง และส่ง "สำเนา" เข้า HIS เพื่อให้ห้องยา/ห้องแล็บ/การเงินทำงานต่อ — คำสั่งจึงปรากฏตรงกันทั้งสองระบบ</p></div>
+  <table>
+    <thead><tr><th>Smart IPD ส่งให้</th><th>HIS ต้องทำอะไรกับมัน</th><th>ระดับ</th></tr></thead>
+    <tbody>
+      <tr><td>คำสั่งยา / แล็บ / เอกซเรย์ / คำสั่งทั่วไป</td><td>รับเข้าระบบกลาง ส่งต่อห้องยา/แล็บ/รังสี และคิดค่าใช้จ่าย แล้วตอบ "รหัสคำสั่ง" กลับ</td><td><span class="pill must">MUST</span></td></tr>
+      <tr><td>การแก้ไข / ยกเลิก / พัก / กลับมาใช้คำสั่ง</td><td>อัปเดตสถานะคำสั่งให้ตรงกัน</td><td><span class="pill must">MUST</span></td></tr>
+      <tr><td>คำขอทราบสถานะ (คำสั่งถูกรับ/จ่ายยาแล้ว/แล็บเสร็จ)</td><td>แจ้งสถานะกลับ (ผ่าน <span class="pill ch3">ช่องทาง 3</span> จะดีที่สุด)</td><td><span class="pill must">MUST</span></td></tr>
+      <tr><td>การจ่ายยา &amp; ค่าใช้จ่าย (ถ้าใช้โมดูลเภสัชของ Smart IPD)</td><td>ตัดสต็อก + คิดเงินเข้าระบบการเงิน</td><td><span class="pill opt">OPT</span></td></tr>
+      <tr><td>การวินิจฉัย (ICD) / สถานะการจำหน่าย</td><td>บันทึกเข้าเวชระเบียน + ใช้เบิกจ่าย/เคลม</td><td><span class="pill opt">OPT</span></td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn"><p><strong>เหตุผลที่ต้องผ่าน API ของ HIS (ไม่เขียน DB ตรง):</strong> เพราะการสั่งยา/คิดเงินต้องผ่านกฎเกณฑ์และการคำนวณของ HIS เอง การเขียนฐานข้อมูลตรงเสี่ยงทำให้ข้อมูลการเงิน/คลังไม่ถูกต้อง</p></div>
+</section>
+
+<!-- 8 -->
+<section id="s8">
+  <h2 class="sec">🔒 8. ความปลอดภัย / สภาพแวดล้อม / สิ่งที่ต้องตกลง</h2>
+  <h3>ความปลอดภัย &amp; การเข้าถึง</h3>
+  <ul>
+    <li><strong>บัญชีเข้าถึง:</strong> ถ้าเปิด DB → ขอแบบอ่านอย่างเดียว; ถ้าเปิด API → ระบุวิธียืนยันตัวตน (OAuth2 / API key / certificate)</li>
+    <li><strong>เครือข่าย:</strong> เปิด firewall/VPN ระหว่าง Smart IPD server กับ HIS เฉพาะที่จำเป็น</li>
+    <li><strong>ความลับข้อมูลผู้ป่วย:</strong> รับส่งผ่านช่องทางเข้ารหัส (เช่น HTTPS/TLS)</li>
+  </ul>
+  <h3>สภาพแวดล้อม (Environments)</h3>
+  <ul>
+    <li><strong>ระบบทดสอบ (Test/UAT):</strong> ขอชุดเชื่อมต่อ + ข้อมูลตัวอย่าง เพื่อพัฒนาและทดสอบก่อน</li>
+    <li><strong>ระบบจริง (Production):</strong> เปิดหลังผ่านการทดสอบร่วม</li>
+  </ul>
+  <h3>เรื่องอื่นที่ควรตกลงร่วมกัน</h3>
+  <ul>
+    <li><strong>ปริมาณ &amp; ความถี่:</strong> จำนวนผู้ป่วย/วอร์ด, ความถี่อัปเดตข้อมูล (เรียลไทม์/รายรอบ)</li>
+    <li><strong>เวลาให้บริการ/การกู้คืน:</strong> ช่วงเวลาที่ระบบ HIS ออนไลน์, แผนเมื่อระบบใดระบบหนึ่งล่ม</li>
+    <li><strong>ผู้ประสานงานเทคนิค:</strong> รายชื่อผู้ติดต่อทั้งสองฝ่าย</li>
+  </ul>
+</section>
+
+<!-- 9 -->
+<section id="s9">
+  <h2 class="sec">🗺️ 9. ขั้นตอนการเชื่อมต่อ (ไทม์ไลน์)</h2>
+  <ol class="proc">
+    <li><span class="actor a-both">ร่วมกัน</span> ประชุมเริ่มงาน (kickoff) — ทบทวนเอกสารนี้ และดูว่า HIS มีอะไรพร้อมแล้วบ้าง</li>
+    <li><span class="actor a-his">HIS</span> ส่งสเปก — โครงสร้างข้อมูล/รายการ API/ตัวอย่างข้อมูล และเปิดสิทธิ์เข้าระบบทดสอบ</li>
+    <li><span class="actor a-ipd">Smart IPD</span> พัฒนา "ตัวเชื่อม" และแปลงข้อมูลให้เข้ารูปแบบที่ใช้</li>
+    <li><span class="actor a-his">HIS</span> เตรียมรับคำสั่งที่ส่งกลับ (สั่งยา/สถานะ)</li>
+    <li><span class="actor a-both">ร่วมกัน</span> ทดสอบการเชื่อมต่อทีละหมวด (อ่านก่อน → เขียนทีหลัง)</li>
+    <li><span class="actor a-both">ร่วมกัน</span> ทดสอบใช้งานจริงเสมือน (UAT) กับผู้ใช้</li>
+    <li><span class="actor a-his">HIS</span> เปิดสิทธิ์ระบบจริง (Production)</li>
+    <li><span class="actor a-both">ร่วมกัน</span> เปิดใช้งาน (Go-Live) + ติดตามผลช่วงแรก</li>
+  </ol>
+</section>
+
+<!-- 10 -->
+<section id="s10">
+  <h2 class="sec">✅ 10. Checklist ความพร้อมของ HIS</h2>
+  <p>ทีม HIS ใช้รายการนี้ประเมินความพร้อมตัวเอง — ติ๊กให้ครบกลุ่ม "จำเป็น" ก่อนเปิดใช้งาน</p>
+
+  <h4>กลุ่มจำเป็น (ต้องมีก่อน Go-Live)</h4>
+  <ul class="check">
+    <li><b>ผู้ป่วย:</b> ให้รายชื่อผู้ป่วยที่นอนอยู่ + ข้อมูลผู้ป่วย (พร้อม HN/AN) ได้</li>
+    <li><b>เหตุการณ์:</b> แจ้ง รับเข้า/ย้าย/จำหน่าย ให้ Smart IPD รับรู้ได้</li>
+    <li><b>บัญชียา:</b> ให้รายการยา + รายละเอียดการใช้ + ราคา ได้</li>
+    <li><b>บัญชีแล็บ/เอกซเรย์/ICD/วอร์ด:</b> ให้รายการเหล่านี้ได้</li>
+    <li><b>บุคลากร:</b> ให้ทำเนียบแพทย์/พยาบาล/เภสัชกร ได้</li>
+    <li><b>ผลตรวจ:</b> ให้ผลแล็บ และผลเอกซเรย์ + ลิงก์ PACS ได้</li>
+    <li><b>รับคำสั่ง:</b> มีช่องทางรับคำสั่งยา/แล็บ/เอกซเรย์ และตอบรหัสคำสั่งกลับ</li>
+    <li><b>สถานะคำสั่ง:</b> แจ้งสถานะ (รับแล้ว/จ่ายแล้ว/เสร็จแล้ว) กลับได้</li>
+    <li><b>รหัสอ้างอิง:</b> ส่ง HN, AN, รหัสบุคลากร, รหัสยา/รายการ มาด้วยทุกครั้ง</li>
+    <li><b>ความปลอดภัย:</b> เตรียมบัญชีเข้าถึง (read-only/ยืนยันตัวตน) + เปิด network</li>
+    <li><b>สภาพแวดล้อมทดสอบ:</b> มีระบบ Test/UAT + ข้อมูลตัวอย่างให้</li>
+    <li><b>ผู้ประสานงาน:</b> ระบุผู้ติดต่อด้านเทคนิคของ HIS</li>
+  </ul>
+
+  <h4>กลุ่มเสริม (เพิ่มได้ภายหลัง)</h4>
+  <ul class="check">
+    <li><b>คู่ยาที่ตีกัน</b> / ข้อควรระวังการสั่งยา</li>
+    <li><b>การจ่ายยา &amp; ค่าใช้จ่าย</b> (ถ้าใช้โมดูลเภสัช)</li>
+    <li><b>วินิจฉัย/สถานะจำหน่าย</b> ส่งกลับเข้าเวชระเบียน</li>
+    <li><b>สัญญาณชีพ</b> (ถ้า HIS เป็นผู้บันทึก)</li>
+    <li><b>ประวัติ OPD/IPD เดิม, รูปติดบัตร, หน่วยข้อมูลทั่วไป</b></li>
+    <li><b>Single Sign-On</b> ล็อกอินด้วยบัญชีเดียวกับ HIS</li>
+  </ul>
+
+  <div class="callout good">
+    <span class="lbl">เริ่มต้นง่าย ๆ</span>
+    <p>ไม่จำเป็นต้องพร้อมครบทุกช่องทางตั้งแต่วันแรก — ขอแค่ <strong>"ข้อมูลกลุ่มจำเป็น"</strong> ผ่านช่องทางใดก็ได้ (เริ่มจากเปิด DB ให้อ่านก็ได้) แล้ว Smart IPD จะพัฒนาตัวเชื่อมให้ ส่วนที่เหลือค่อยเพิ่มทีหลัง</p>
+  </div>
+</section>
+
+<!-- contact -->
+<section id="contact">
+  <h2 class="sec">📞 ติดต่อ &amp; ขั้นตอนถัดไป</h2>
+  <p>หากทีม HIS พร้อมเริ่มต้น โปรดติดต่อเพื่อ<strong>นัดประชุมเริ่มงาน (kickoff)</strong> และ<strong>ขอชุดเชื่อมต่อระบบทดสอบ</strong></p>
+  <table>
+    <tbody>
+      <tr><th style="width:38%">ผู้ดูแลการเชื่อมต่อ (Integration Lead)</th><td>[ชื่อ–สกุล ผู้รับผิดชอบฝั่ง Smart IPD]</td></tr>
+      <tr><th>อีเมล</th><td>[email@example.com]</td></tr>
+      <tr><th>โทรศัพท์ / ช่องทางอื่น</th><td>[เบอร์ติดต่อ / Line / Teams]</td></tr>
+      <tr><th>เอกสารอ้างอิงเชิงเทคนิค</th><td>SmartIPD-HIS-Integration-Spec (สำหรับทีมพัฒนา)</td></tr>
+      <tr><th>เวอร์ชันเอกสาร</th><td>v1.0 · 11 มิถุนายน 2026</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:13px;color:var(--muted)">* แทนที่ข้อความในวงเล็บ [...] ด้วยข้อมูลจริงก่อนส่งให้พาร์ทเนอร์</p>
+</section>
+
+<footer>
+  Smart IPD — คู่มือเตรียมความพร้อมเชื่อมต่อสำหรับทีม HIS · เอกสารนำเสนอพันธมิตร · v1.0 · 11 มิถุนายน 2026
+</footer>
+
+</div>
+</body>
+</html>

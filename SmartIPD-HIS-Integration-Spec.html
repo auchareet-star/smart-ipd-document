@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart IPD — HIS Integration Spec (Vendor-Neutral)</title>
+<style>
+  :root{
+    --bg:#f6f8fa; --card:#fff; --ink:#1f2328; --muted:#57606a; --line:#d0d7de;
+    --own:#1a7f37; --ownbg:#e8f5e9; --db:#8250df; --dbbg:#f3eefb; --hisapi:#0969da; --hisapibg:#ddf4ff;
+    --ipdapi:#0a7a6e; --ipdapibg:#dff7f3; --warn:#bf8700; --warnbg:#fff8c5; --code:#eaeef2;
+    --req:#cf222e; --opt:#57606a;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Segoe UI","Sarabun","Noto Sans Thai",Tahoma,sans-serif; line-height:1.7; font-size:15px;}
+  .wrap{max-width:1180px; margin:0 auto; padding:32px 20px 80px;}
+  header.doc{background:linear-gradient(135deg,#0a7a6e,#0a3069); color:#fff;
+    border-radius:14px; padding:28px 32px; margin-bottom:26px; box-shadow:0 4px 18px rgba(10,122,110,.25);}
+  header.doc h1{margin:0 0 8px; font-size:26px;}
+  header.doc p{margin:4px 0; opacity:.93; font-size:14px;}
+  header.doc .meta{margin-top:14px; font-size:12.5px; opacity:.85; border-top:1px solid rgba(255,255,255,.25); padding-top:12px;}
+  header.doc code{background:rgba(255,255,255,.18); color:#fff; padding:1px 6px; border-radius:5px;}
+
+  nav.toc{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px 24px; margin-bottom:26px;}
+  nav.toc h2{margin:0 0 10px; font-size:16px; color:var(--muted);}
+  nav.toc ol{margin:0; padding-left:22px; columns:2; column-gap:34px;}
+  nav.toc a{color:var(--hisapi); text-decoration:none;} nav.toc a:hover{text-decoration:underline;}
+
+  section{background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:24px 28px; margin-bottom:22px; box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  h2.sec{margin:0 0 16px; font-size:21px; padding-bottom:10px; border-bottom:2px solid var(--line);}
+  h3{font-size:17px; margin:22px 0 10px;}
+  h4{font-size:15px; margin:16px 0 6px; color:var(--muted);}
+  ul,ol{margin:10px 0; padding-left:24px;} li{margin:5px 0;}
+  code{background:var(--code); padding:1.5px 6px; border-radius:5px; font-family:"Cascadia Code",Consolas,monospace; font-size:13px;}
+  strong{color:#000;}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px;}
+  th,td{border:1px solid var(--line); padding:7px 10px; text-align:left; vertical-align:top;}
+  th{background:#f0f3f6; font-weight:600;}
+  tbody tr:nth-child(even){background:#fafbfc;}
+
+  .pill{display:inline-block; padding:1px 9px; border-radius:20px; font-size:11.5px; font-weight:600; white-space:nowrap;}
+  .own{background:var(--ownbg); color:var(--own);}
+  .db{background:var(--dbbg); color:var(--db);}
+  .hisapi{background:var(--hisapibg); color:var(--hisapi);}
+  .ipdapi{background:var(--ipdapibg); color:var(--ipdapi);}
+  .req{background:#ffeef0; color:var(--req); font-weight:700;}
+  .opt{background:#eef1f4; color:var(--opt);}
+
+  .callout{border-radius:10px; padding:14px 18px; margin:16px 0; border:1px solid;}
+  .callout.key{background:var(--hisapibg); border-color:#54aeff;}
+  .callout.warn{background:var(--warnbg); border-color:#d4a72c;}
+  .callout .lbl{font-weight:700; display:block; margin-bottom:4px;}
+  .callout p:first-child{margin-top:0;} .callout p:last-child{margin-bottom:0;}
+
+  .arch{background:#0d1117; color:#c9d1d9; border-radius:10px; padding:18px 22px;
+    font-family:"Cascadia Code",Consolas,monospace; font-size:12px; line-height:1.5; white-space:pre; overflow-x:auto; margin:14px 0;}
+  pre.codeblock{background:#0d1117; color:#c9d1d9; border-radius:10px; padding:16px 20px;
+    font-family:"Cascadia Code",Consolas,monospace; font-size:12.5px; line-height:1.55; overflow-x:auto; margin:14px 0;}
+  pre.codeblock .c{color:#8b949e;} pre.codeblock .k{color:#ff7b72;} pre.codeblock .s{color:#a5d6ff;} pre.codeblock .t{color:#7ee787;}
+
+  .legend{display:flex; gap:16px; flex-wrap:wrap; margin:12px 0; font-size:12.5px;}
+  .legend span{display:flex; align-items:center; gap:6px;}
+  .zone{border-left:5px solid; border-radius:8px; padding:12px 18px; margin:14px 0; background:#fafbfc;}
+  .zone.a{border-color:var(--own);} .zone.b{border-color:var(--hisapi);} .zone.c{border-color:var(--ipdapi);}
+  .zone h4{margin:0 0 6px; color:var(--ink); font-size:15px;}
+  footer{text-align:center; color:var(--muted); font-size:12.5px; margin-top:30px;}
+  @media print{ body{background:#fff;} section,nav.toc,header.doc{box-shadow:none; border:1px solid #ccc; break-inside:avoid;} nav.toc ol{columns:1;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="doc">
+  <h1>Smart IPD — HIS Integration Specification</h1>
+  <p>ข้อกำหนดการเชื่อมต่อแบบ Vendor-Neutral — เมื่อ Smart IPD แยกออกมาเป็นผลิตภัณฑ์อิสระ จะเชื่อมต่อกับ HIS เจ้าใดก็ได้อย่างไร</p>
+  <p>สถาปัตยกรรม: <strong>Port–Adapter (Hexagonal)</strong> · Custom REST + Adapter Contract · ต่อยอดจาก <code>IHisAdapter</code> ที่มีอยู่แล้ว (~322 methods / 31 domain modules)</p>
+  <div class="meta">
+    v0.1 (Draft) · อ้างอิง codebase: <code>HAOS.SmartIPD.Application/Interfaces/IHisAdapter.cs</code>,
+    <code>HaosHisAdapter.*.cs</code>, <code>HaosDatabaseService.cs</code> · เอกสารพี่น้อง: <code>SmartIPD-API-Ownership-Analysis.html</code>
+  </div>
+</header>
+
+<nav class="toc">
+  <h2>สารบัญ</h2>
+  <ol>
+    <li><a href="#s1">1. วัตถุประสงค์และขอบเขต</a></li>
+    <li><a href="#s2">2. หลักการ: Port–Adapter</a></li>
+    <li><a href="#s3">3. โมเดลความเป็นเจ้าของข้อมูล (3 Zone)</a></li>
+    <li><a href="#s4">4. ช่องทางการเชื่อมต่อ (3 Integration Modes)</a></li>
+    <li><a href="#s5">5. HIS Provider Contract (Capability Catalog)</a></li>
+    <li><a href="#s6">6. Canonical Data Model</a></li>
+    <li><a href="#s7">7. Identity &amp; Correlation</a></li>
+    <li><a href="#s8">8. Connection Profile (Config)</a></li>
+    <li><a href="#s9">9. ขั้นตอนเชื่อม HIS เจ้าใหม่ (Onboarding)</a></li>
+    <li><a href="#s10">10. Cross-cutting: Security / Sync / Errors</a></li>
+    <li><a href="#s11">11. Conformance: Must-have vs Optional</a></li>
+    <li><a href="#s12">12. สรุป: อะไรอยู่ที่ Smart IPD vs ต้องใช้จาก HIS</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="s1">
+  <h2 class="sec">1. วัตถุประสงค์และขอบเขต</h2>
+  <p><strong>เป้าหมาย:</strong> ทำให้ Smart IPD เป็นผลิตภัณฑ์ที่ "ไม่ผูกกับ HIS เจ้าใดเจ้าหนึ่ง" — โรงพยาบาลที่ใช้ HIS ยี่ห้ออื่น (ไม่ใช่ HAOS/Panacea) สามารถนำ Smart IPD ไปติดตั้งและเชื่อมกับ HIS เดิมของตนได้ โดย<strong>ไม่ต้องแก้โค้ดแกนของ Smart IPD</strong> เพียงเขียน "adapter" หนึ่งตัวต่อ HIS หนึ่งเจ้า</p>
+  <h3>หลักการสำคัญ 3 ข้อ</h3>
+  <ol>
+    <li><strong>Smart IPD เป็นเจ้าของ domain ของ IPD เอง</strong> — ข้อมูลที่เคยอยู่ในตาราง <code>TB_IPD_*</code>/<code>TBM_IPD_*</code> ของ HAOS จะย้ายมาอยู่ในฐานข้อมูลของ Smart IPD (ดูเอกสาร Ownership Analysis)</li>
+    <li><strong>HIS เป็น "system of record" ของข้อมูลแกนกลาง</strong> — ผู้ป่วย, การ admit, แพทย์/พยาบาล, drug/lab/xray catalog, การเงิน ยังเป็นของ HIS</li>
+    <li><strong>การคุยกันเกิดผ่าน contract กลางเพียงจุดเดียว</strong> — interface <code>IHisProvider</code> (เดิมคือ <code>IHisAdapter</code>) แต่ละ HIS implement contract นี้ตามเทคโนโลยีที่ตัวเองมี</li>
+  </ol>
+  <div class="callout key">
+    <span class="lbl">ข้อได้เปรียบ: contract นี้มีอยู่แล้ว</span>
+    <p>ระบบปัจจุบันมี <code>IHisAdapter</code> (~322 methods แบ่งเป็น 31 domain modules เช่น Patient, OrderNote, Lab, Dispensing) ทำหน้าที่เป็น "seam" คั่นระหว่าง Smart IPD กับ HAOS อยู่แล้ว — DTO ที่ส่งผ่านก็เป็นชนิดกลางของ Smart IPD เอง (เช่น <code>AdmittedPatientDto</code>, <code>HisDoctorNoteDto</code>) ไม่ใช่ schema ของ HAOS. Spec นี้คือการ <strong>"ทำให้ contract นี้เป็นมาตรฐานและ vendor-neutral อย่างเป็นทางการ"</strong> ไม่ได้สร้างใหม่จากศูนย์</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="s2">
+  <h2 class="sec">2. หลักการสถาปัตยกรรม: Port–Adapter (Hexagonal)</h2>
+<div class="arch">      ┌─────────────────────── Smart IPD Product (vendor-neutral core) ───────────────────────┐
+      │                                                                                       │
+      │   Frontend (Angular)  →  WebAPI Controllers  →  Application Services                   │
+      │                                                          │                            │
+      │                                          ┌───────────────┴───────────────┐            │
+      │                                          │  Smart IPD OWN DB              │            │
+      │                                          │  (IPD clinical data, auth,     │            │
+      │                                          │   AI, tags, DICOM index)       │            │
+      │                                          └───────────────────────────────┘            │
+      │                                                          │                            │
+      │                                    ╔═════════ PORT ═══════╧═══════════╗                │
+      │                                    ║  IHisProvider (contract กลาง)    ║                │
+      │                                    ║  ~322 capability methods         ║                │
+      │                                    ╚═════════╤═══════════╤═══════════╤═╝                │
+      └──────────────────────────────────────────────┼───────────┼───────────┼──────────────────┘
+                                                     │           │           │
+                                          ┌──────────┴──┐ ┌──────┴─────┐ ┌───┴────────┐
+                                          │ HAOS Adapter│ │ HIS-B Adapt│ │ HIS-C Adapt│   ← ADAPTERS
+                                          │(มีแล้ววันนี้)│ │  (FHIR)    │ │ (DB ตรง)   │     (1 ตัว/HIS)
+                                          └──────┬──────┘ └─────┬──────┘ └─────┬──────┘
+                                                 │              │              │
+                                            HAOS HIS        HIS เจ้า B      HIS เจ้า C</div>
+  <ul>
+    <li><strong>Port</strong> = <code>IHisProvider</code> — สัญญา (capabilities) ที่ Smart IPD ต้องการจาก "HIS ใดก็ได้" นิยามด้วย DTO กลางของ Smart IPD</li>
+    <li><strong>Adapter</strong> = หนึ่ง assembly ต่อหนึ่ง HIS — แปลง (map) ระหว่าง contract กลาง ↔ เทคโนโลยีจริงของ HIS นั้น (REST/SOAP/FHIR/SQL)</li>
+    <li>Smart IPD core <strong>ไม่รู้จัก</strong>ว่าปลายทางเป็น HIS เจ้าไหน — เลือก adapter ผ่าน DI + config ตอน runtime</li>
+  </ul>
+  <pre class="codeblock"><span class="c">// Smart IPD core เรียกผ่าน contract เดียว — ไม่ผูกยี่ห้อ</span>
+<span class="k">public interface</span> <span class="t">IHisProvider</span> {
+    Task&lt;AdmittedPatientDto[]&gt; <span class="t">GetAdmittedPatientsAsync</span>(WardFilter f);
+    Task&lt;PatientAdmissionCardDto?&gt; <span class="t">GetPatientAdmissionCardAsync</span>(<span class="k">string</span> an);
+    Task&lt;<span class="k">string</span>&gt; <span class="t">SubmitMedicationOrderAsync</span>(MedicationOrderDto order); <span class="c">// write-back to HIS</span>
+    <span class="c">// ... ~322 capabilities จัดกลุ่มเป็น 31 domain</span>
+}
+
+<span class="c">// แต่ละ HIS = adapter หนึ่งตัว เลือกด้วย config</span>
+<span class="k">services</span>.AddHisProvider(config[<span class="s">"His:Vendor"</span>]); <span class="c">// "haos" | "fhir" | "vendorB"</span></pre>
+</section>
+
+<!-- 3 -->
+<section id="s3">
+  <h2 class="sec">3. โมเดลความเป็นเจ้าของข้อมูล (Data Ownership — 3 Zones)</h2>
+  <p>การจะตอบว่า "ส่วนไหนมีใน Smart IPD เอง ส่วนไหนต้องใช้จาก HIS" ต้องแบ่งข้อมูลเป็น 3 โซน:</p>
+
+  <div class="zone a">
+    <h4><span class="pill own">Zone A</span> Smart IPD เป็นเจ้าของ 100% (อยู่ใน DB ของ Smart IPD)</h4>
+    <p>ข้อมูลที่เกิดและใช้เฉพาะใน IPD workflow — <strong>ไม่ต้องพึ่ง HIS เลย</strong></p>
+    <ul>
+      <li>เอกสารคลินิก IPD: Doctor/Nurse Notes, Order Notes, eMAR (Order Plan), Nursing Care Plan, Admission Record, History &amp; Physical, Discharge Summary, Intake/Output, Med Reconcile <em>(เดิม <code>TB_IPD_*</code>)</em></li>
+      <li>Master/config ของ IPD: FAIE (focus/assessment/intervention/outcome/templates), I/O master <em>(เดิม <code>TBM_IPD_*</code>)</em></li>
+      <li>ฟีเจอร์เฉพาะ Smart IPD: Authentication/JWT, AI Chat + cache, Patient Tags, DICOM file index</li>
+    </ul>
+  </div>
+
+  <div class="zone b">
+    <h4><span class="pill hisapi">Zone B</span> ข้อมูลอ้างอิงจาก HIS (อ่านเป็นหลัก — Read)</h4>
+    <p>Smart IPD <strong>ต้องดึง</strong>มาแสดง/ใช้ประกอบ แต่ไม่ได้เป็นเจ้าของ — HIS คือ system of record</p>
+    <ul>
+      <li>Patient demographics, รายการ admit ปัจจุบัน (admitted patients), ward/bed</li>
+      <li>Master data กลาง: ward, ICD, drug catalog, lab/xray catalog, routes, units, ฯลฯ</li>
+      <li>ผลตรวจ: Lab results, X-ray/PACS results, Vital signs (ถ้า HIS เป็นคนเก็บ)</li>
+      <li>Directory บุคลากร: แพทย์, พยาบาล, เภสัชกร</li>
+      <li>ประวัติ OPD/IPD เดิม</li>
+    </ul>
+  </div>
+
+  <div class="zone c">
+    <h4><span class="pill ipdapi">Zone C</span> ข้อมูลที่ต้อง "เขียนกลับ" เข้า HIS (Write-back)</h4>
+    <p>เกิดใน Smart IPD แต่<strong>ต้องไหลเข้า HIS</strong>เพื่อระบบกลาง (billing, pharmacy, เวชระเบียนทางกฎหมาย)</p>
+    <ul>
+      <li>คำสั่งยา/แล็บ/เอกซเรย์ (orders) → เข้าระบบ pharmacy/LIS/RIS และการเงินของ HIS</li>
+      <li>การจ่ายยา (dispensing) → ตัด stock / charge เข้า <code>TB_FINANCES</code> ของ HIS</li>
+      <li>Diagnosis (ICD) / Discharge status → เวชระเบียน + เคลม</li>
+      <li>(ตัวเลือก) สำเนาเอกสารคลินิกบางส่วน เพื่อรวมศูนย์เวชระเบียน</li>
+    </ul>
+  </div>
+
+  <div class="callout warn">
+    <span class="lbl">หัวใจของ Spec</span>
+    <p>Zone A = "มีใน Smart IPD เอง" · Zone B = "อ่านจาก HIS" · Zone C = "เขียนกลับ HIS". <strong>Zone B และ C คือสิ่งที่ contract <code>IHisProvider</code> ต้องครอบคลุม</strong> และแต่ละรายการเลือกช่องทางเชื่อมต่อได้ (ข้อ 4)</p>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="s4">
+  <h2 class="sec">4. ช่องทางการเชื่อมต่อ (3 Integration Modes)</h2>
+  <p>แต่ละ capability ใน contract สามารถ realize ด้วยช่องทางใดช่องทางหนึ่ง (หรือผสม) — กำหนดได้ต่อ HIS ต่อ capability ผ่าน config</p>
+  <div class="legend">
+    <span><span class="pill db">Mode 1 · Direct DB</span> เชื่อม DB ของ HIS ตรง</span>
+    <span><span class="pill hisapi">Mode 2 · HIS-Provided API</span> เรียก API ที่ HIS เปิดให้</span>
+    <span><span class="pill ipdapi">Mode 3 · Smart IPD-Provided API</span> HIS ส่งข้อมูลเข้า Smart IPD</span>
+  </div>
+  <table>
+    <thead><tr><th>Mode</th><th>ทิศทาง</th><th>คำอธิบาย</th><th>เหมาะกับ</th><th>ข้อควรระวัง</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="pill db">Mode 1<br>Direct DB</span></td>
+        <td>Smart IPD → DB ของ HIS</td>
+        <td>Adapter query ตาราง/view/stored-proc ของ HIS โดยตรง (อ่านอย่างเดียวแนะนำให้ใช้ read replica). <strong>เป็นวิธีที่ HAOS adapter ใช้อยู่จริงวันนี้</strong> ผ่าน <code>HaosDatabaseService</code> + <code>HaosConnection</code></td>
+        <td>HIS ที่ไม่มี API ครบ / ต้องการ performance สูง / query ซับซ้อนข้ามหลายตาราง / enrichment</td>
+        <td>ผูกกับ schema ภายในของ HIS (เปราะเมื่อ HIS upgrade); เสี่ยงด้านสิทธิ์/ความปลอดภัย; เขียนกลับตรงอันตราย — ควรอ่านเท่านั้น</td>
+      </tr>
+      <tr>
+        <td><span class="pill hisapi">Mode 2<br>HIS API</span></td>
+        <td>Smart IPD → API ของ HIS</td>
+        <td>Adapter เรียก REST/SOAP/FHIR/HL7 ที่ HIS provide. <strong>HAOS adapter ใช้วิธีนี้ผ่าน Kiota client</strong> สำหรับการเขียน (orders, notes)</td>
+        <td>การเขียนกลับ (Zone C) ที่ต้องผ่าน business logic ของ HIS; ข้อมูลที่ HIS มี API พร้อม; ลด coupling กับ schema</td>
+        <td>ขึ้นกับว่า HIS มี API ครบหรือไม่; latency; ต้อง map auth ของแต่ละ HIS</td>
+      </tr>
+      <tr>
+        <td><span class="pill ipdapi">Mode 3<br>Smart IPD API</span></td>
+        <td>HIS → API ของ Smart IPD</td>
+        <td>Smart IPD เปิด inbound endpoint/webhook ให้ HIS "push" ข้อมูลเข้ามา (เช่น ADT feed แจ้ง admit/discharge/transfer, master data sync). HIS เป็นฝ่ายเรียก ตาม contract ที่ Smart IPD กำหนด</td>
+        <td>เหตุการณ์ real-time (admit/transfer/discharge); การ sync master data เป็นรอบ; HIS ที่ส่ง HL7 ADT/ORM ได้อยู่แล้ว; ลดภาระ polling</td>
+        <td>ต้องมี idempotency + ordering; Smart IPD ต้องเก็บสำเนา (cache/replica) ของข้อมูลที่รับเข้ามา</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3>กฎการเลือก Mode (Decision Guide)</h3>
+  <ul>
+    <li><strong>เขียนกลับเข้า HIS (Zone C)</strong> → ใช้ <span class="pill hisapi">Mode 2</span> เป็นหลัก (ผ่าน business logic ของ HIS) — <em>ห้าม</em>เขียน DB ตรง</li>
+    <li><strong>อ่านข้อมูล master/reference ที่เปลี่ยนช้า (Zone B)</strong> → <span class="pill ipdapi">Mode 3</span> sync เข้ามา cache (ดีสุด) หรือ <span class="pill hisapi">Mode 2</span> เรียกตามต้องการ</li>
+    <li><strong>อ่านข้อมูลปริมาณมาก/ซับซ้อน หรือ HIS ไม่มี API</strong> → <span class="pill db">Mode 1</span> (read replica)</li>
+    <li><strong>เหตุการณ์ผู้ป่วย (admit/transfer/discharge)</strong> → <span class="pill ipdapi">Mode 3</span> webhook/ADT ถ้าได้, fallback เป็น polling ผ่าน Mode 1/2</li>
+  </ul>
+</section>
+
+<!-- 5 -->
+<section id="s5">
+  <h2 class="sec">5. HIS Provider Contract — Capability Catalog</h2>
+  <p>นี่คือ "สัญญา" ที่ HIS ทุกเจ้าต้อง (หรือควร) รองรับ จัดกลุ่มตาม domain เดียวกับ <code>HaosHisAdapter.*.cs</code>. คอลัมน์ <em>Mode แนะนำ</em> = ช่องทางที่ควรใช้; <em>R/W</em> = อ่าน/เขียน</p>
+  <div class="legend">
+    <span><span class="pill req">MUST</span> จำเป็นขั้นต่ำ</span>
+    <span><span class="pill opt">OPT</span> เสริม</span>
+    <span><span class="pill db">DB</span></span><span><span class="pill hisapi">HIS API</span></span><span><span class="pill ipdapi">IPD API</span></span>
+  </div>
+
+  <h3>5.1 Patient &amp; Admission <span class="pill hisapi">Zone B</span> / event <span class="pill ipdapi">Zone C-in</span></h3>
+  <table>
+    <thead><tr><th>Capability</th><th>R/W</th><th>ระดับ</th><th>Mode แนะนำ</th><th>หมายเหตุ</th></tr></thead>
+    <tbody>
+      <tr><td>GetAdmittedPatients (รายชื่อผู้ป่วยในวอร์ด)</td><td>R</td><td><span class="pill req">MUST</span></td><td><span class="pill ipdapi">IPD API</span> push หรือ <span class="pill db">DB</span>/<span class="pill hisapi">HIS API</span> poll</td><td>หัวใจของ worklist — ต้อง real-time พอควร</td></tr>
+      <tr><td>GetPatientAdmissionCard / GetPatientInfo</td><td>R</td><td><span class="pill req">MUST</span></td><td><span class="pill hisapi">HIS API</span> / <span class="pill db">DB</span></td><td>demographics + allergy + สิทธิ</td></tr>
+      <tr><td>ADT events: Admit / Transfer ward-bed / Discharge / Cancel</td><td>R(event)</td><td><span class="pill req">MUST</span></td><td><span class="pill ipdapi">IPD API</span> (HL7 ADT/webhook)</td><td>ถ้าไม่มี push → poll admitted list</td></tr>
+      <tr><td>Admit / TransferWard / TransferBed (สั่งจาก Smart IPD)</td><td>W</td><td><span class="pill opt">OPT</span></td><td><span class="pill hisapi">HIS API</span></td><td>ถ้าให้ Smart IPD เป็นคนสั่ง — ไม่งั้นทำใน HIS</td></tr>
+      <tr><td>OPD/IPD history</td><td>R</td><td><span class="pill opt">OPT</span></td><td><span class="pill db">DB</span> / <span class="pill hisapi">HIS API</span></td><td>ประวัติเก่า</td></tr>
+      <tr><td>Doctor/Nurse assignment per patient</td><td>R/W</td><td><span class="pill opt">OPT</span></td><td><span class="pill hisapi">HIS API</span> / <span class="pill db">DB</span></td><td>บางรพ.จัดใน HIS</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 Master Data &amp; Directory <span class="pill hisapi">Zone B</span></h3>
+  <table>
+    <thead><tr><th>Capability</th><th>R/W</th><th>ระดับ</th><th>Mode แนะนำ</th><th>หมายเหตุ</th></tr></thead>
+    <tbody>
+      <tr><td>Wards, Beds, Rooms (lab/xray/pharmacy)</td><td>R</td><td><span class="pill req">MUST</span></td><td><span class="pill ipdapi">IPD API</span> sync / <span class="pill db">DB</span></td><td>เปลี่ยนช้า → cache ได้</td></tr>
+      <tr><td>Drug catalog + properties + interactions + timing/route/unit</td><td>R</td><td><span class="pill req">MUST</span></td><td><span class="pill hisapi">HIS API</span> / <span class="pill db">DB</span> / sync</td><td>single source = HIS (เภสัช/คลัง)</td></tr>
+      <tr><td>Lab catalog/templates, Xray items/modalities, organs</td><td>R</td><td><span class="pill req">MUST</span></td><td><span class="pill db">DB</span> / sync</td><td>ใช้ตอนสั่ง order</td></tr>
+      <tr><td>ICD codes, diagnosis types/sides, discharge statuses/types</td><td>R</td><td><span class="pill req">MUST</span></td><td>sync / <span class="pill db">DB</span></td><td>มาตรฐานสากล — map ง่าย</td></tr>
+      <tr><td>Doctors / Nurses / Pharmacists directory</td><td>R</td><td><span class="pill req">MUST</span></td><td><span class="pill hisapi">HIS API</span> / <span class="pill db">DB</span></td><td>ใช้ผูกคนสั่ง/คนรับ</td></tr>
+      <tr><td>Countries, nationalities, religions, marital status ฯลฯ</td><td>R</td><td><span class="pill opt">OPT</span></td><td>sync / <span class="pill db">DB</span></td><td>ใช้ในใบ admission record</td></tr>
+      <tr><td>Finance types / patient rights</td><td>R</td><td><span class="pill opt">OPT</span></td><td><span class="pill db">DB</span> / <span class="pill hisapi">HIS API</span></td><td>จำเป็นถ้าทำ dispensing/charge</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.3 Results &amp; Vitals <span class="pill hisapi">Zone B</span></h3>
+  <table>
+    <thead><tr><th>Capability</th><th>R/W</th><th>ระดับ</th><th>Mode แนะนำ</th><th>หมายเหตุ</th></tr></thead>
+    <tbody>
+      <tr><td>Lab results (+ comparison)</td><td>R</td><td><span class="pill req">MUST</span></td><td><span class="pill db">DB</span> / <span class="pill hisapi">HIS API</span> / FHIR Observation</td><td>มาจาก LIS</td></tr>
+      <tr><td>X-ray / imaging results + PACS link</td><td>R</td><td><span class="pill req">MUST</span></td><td><span class="pill hisapi">HIS API</span> / <span class="pill db">DB</span> + PACS URL</td><td>ภาพจริงผ่าน PACS viewer (DICOM)</td></tr>
+      <tr><td>Vital signs (ถ้า HIS เป็นเจ้าของ)</td><td>R/W</td><td><span class="pill opt">OPT</span></td><td><span class="pill hisapi">HIS API</span> / <span class="pill db">DB</span></td><td>หรือให้ Smart IPD เป็นเจ้าของ → ย้ายเป็น Zone A</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.4 Orders &amp; Dispensing — Write-back <span class="pill ipdapi">Zone C</span></h3>
+  <table>
+    <thead><tr><th>Capability</th><th>R/W</th><th>ระดับ</th><th>Mode แนะนำ</th><th>หมายเหตุ</th></tr></thead>
+    <tbody>
+      <tr><td>Submit Medication / Lab / Xray / General order</td><td>W</td><td><span class="pill req">MUST</span></td><td><span class="pill hisapi">HIS API</span> (FHIR *Request / HL7 ORM)</td><td>ต้องผ่าน HIS เพื่อ charge + ส่งห้องปฏิบัติ</td></tr>
+      <tr><td>Update / Cancel / Hold / Resume order</td><td>W</td><td><span class="pill req">MUST</span></td><td><span class="pill hisapi">HIS API</span></td><td>state ต้อง sync กับ HIS</td></tr>
+      <tr><td>Order status / dispensing status feedback</td><td>R</td><td><span class="pill req">MUST</span></td><td><span class="pill ipdapi">IPD API</span> push / <span class="pill hisapi">HIS API</span> poll</td><td>รู้ว่ายาถูกจ่าย/แล็บเสร็จ</td></tr>
+      <tr><td>Dispense medication / charge</td><td>W</td><td><span class="pill opt">OPT</span></td><td><span class="pill hisapi">HIS API</span></td><td>ถ้า Smart IPD ทำ pharmacist module; ผูก billing</td></tr>
+      <tr><td>Medical expense / charge summary</td><td>R</td><td><span class="pill opt">OPT</span></td><td><span class="pill db">DB</span> / <span class="pill hisapi">HIS API</span></td><td>แสดงค่าใช้จ่าย</td></tr>
+      <tr><td>Diagnosis (ICD) write-back / Discharge status</td><td>W</td><td><span class="pill opt">OPT</span></td><td><span class="pill hisapi">HIS API</span></td><td>เพื่อเคลม/เวชระเบียน</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.5 Reports / Documents <span class="pill hisapi">Zone B/C</span></h3>
+  <table>
+    <thead><tr><th>Capability</th><th>R/W</th><th>ระดับ</th><th>Mode แนะนำ</th><th>หมายเหตุ</th></tr></thead>
+    <tbody>
+      <tr><td>Drug sticker / appointment card / med certificate PDF data</td><td>R</td><td><span class="pill opt">OPT</span></td><td><span class="pill db">DB</span> + local report engine</td><td>Smart IPD render เองได้ (วันนี้ใช้ Stimulsoft)</td></tr>
+      <tr><td>Patient picture</td><td>R</td><td><span class="pill opt">OPT</span></td><td><span class="pill db">DB</span> / <span class="pill hisapi">HIS API</span></td><td>รูปติดบัตรผู้ป่วย</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout key">
+    <span class="lbl">Domain ที่ไม่อยู่ในตารางนี้ = อยู่ใน Zone A (Smart IPD ทำเองทั้งหมด)</span>
+    <p>FAIE master data, Nurse/Doctor Notes, Nursing Record, Order Plan (eMAR), Admission Record, History&amp;Physical, Discharge Summary, Intake/Output, Med Reconcile, Focus Items, Patient Tags, AI Chat — <strong>ไม่ต้องการ capability จาก HIS</strong> (นอกจาก reference id ของผู้ป่วย/ผู้ใช้) เพราะ Smart IPD เป็นเจ้าของข้อมูลเอง</p>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="s6">
+  <h2 class="sec">6. Canonical Data Model (DTO กลาง)</h2>
+  <p>contract สื่อสารด้วย "DTO กลางของ Smart IPD" ไม่ใช่ schema ของ HIS — adapter มีหน้าที่ map. DTO เหล่านี้<strong>มีอยู่แล้ว</strong>ในโค้ด (ใน <code>HAOS.SmartIPD.Application/DTOs/</code>)</p>
+  <table>
+    <thead><tr><th>Canonical DTO (มีแล้ว)</th><th>ฟิลด์ขั้นต่ำที่ทุก HIS ต้อง map ได้</th></tr></thead>
+    <tbody>
+      <tr><td><code>AdmittedPatientDto</code></td><td>AN, HN, ชื่อ-นามสกุล, เพศ, อายุ/วันเกิด, ward, bed, แพทย์เจ้าของไข้, วันที่ admit, สถานะ</td></tr>
+      <tr><td><code>PatientInfoDto</code> / <code>PatientAdmissionCardDto</code></td><td>demographics เต็ม, สิทธิการรักษา, allergy list, diagnosis ปัจจุบัน</td></tr>
+      <tr><td><code>HisLabResultDto</code></td><td>วันที่, ชื่อ test, ค่า, หน่วย, ค่าอ้างอิง, flag ผิดปกติ, lab group</td></tr>
+      <tr><td><code>HisXrayResultDto</code></td><td>วันที่, modality, ชื่อรายการ, ผลอ่าน, PACS link/study UID</td></tr>
+      <tr><td><code>DrugDto</code> / catalog DTOs</td><td>drug code, ชื่อการค้า/สามัญ, รูปแบบ, ความแรง, route, unit, ราคา, คุณสมบัติ(HAD ฯลฯ)</td></tr>
+      <tr><td><code>MedicationOrderDto</code> (write)</td><td>AN, drug code, dose, route, frequency, จำนวน, ผู้สั่ง, ประเภท(one-day/continue)</td></tr>
+      <tr><td><code>DoctorDto</code> / <code>NurseDto</code></td><td>id, ชื่อ, สาขา/ตำแหน่ง, license, สถานะ active</td></tr>
+      <tr><td><code>WardDto</code>, <code>WorkPlaceDto</code></td><td>code, ชื่อ, ประเภท</td></tr>
+    </tbody>
+  </table>
+  <p><strong>หลักการ map:</strong> ทุก adapter รับ schema ของ HIS เข้ามาแล้วคืน DTO กลางนี้เสมอ → Smart IPD core เห็นข้อมูลเหมือนกันทุก HIS</p>
+</section>
+
+<!-- 7 -->
+<section id="s7">
+  <h2 class="sec">7. Identity &amp; Correlation (การอ้างอิงข้ามระบบ)</h2>
+  <p>เมื่อ Smart IPD เก็บข้อมูล IPD เอง (Zone A) แต่ต้องอ้างถึงผู้ป่วย/ผู้ใช้ของ HIS — ใช้หลัก <strong>"External Reference ID แบบ opaque"</strong> ไม่ทำ DB-level FK ข้ามฐาน</p>
+  <ul>
+    <li>ตาราง Zone A เก็บ <code>HisPatientRef</code> (เช่น HN), <code>HisAdmissionRef</code> (เช่น AN/AdmitId), <code>HisUserRef</code> เป็น "ค่า" (string/identifier ของ HIS)</li>
+    <li>ความหมายของ id เหล่านี้ถูก "ตีความ" โดย adapter เท่านั้น — HIS เจ้าอื่นอาจใช้ AN คนละรูปแบบ; adapter รับผิดชอบ resolve</li>
+    <li>มี <strong>correlation map กลาง</strong>: ระบบ identifier ของ Smart IPD ↔ identifier ของ HIS (กรณีต้อง normalize)</li>
+    <li>validation เกิดที่ระดับ application (เรียก <code>IHisProvider.PatientExists(an)</code>) ไม่ใช่ที่ DB constraint</li>
+  </ul>
+  <table>
+    <thead><tr><th>Reference ในข้อมูล Smart IPD</th><th>ความหมาย</th><th>ใครตีความ</th></tr></thead>
+    <tbody>
+      <tr><td><code>HisAdmissionRef</code> (AN)</td><td>ตอน admission หนึ่งครั้งของผู้ป่วย</td><td>adapter ของ HIS นั้น</td></tr>
+      <tr><td><code>HisPatientRef</code> (HN)</td><td>ตัวผู้ป่วย</td><td>adapter</td></tr>
+      <tr><td><code>HisUserRef</code></td><td>แพทย์/พยาบาล/เภสัช ผู้ทำรายการ</td><td>adapter + directory sync</td></tr>
+      <tr><td><code>HisDrugRef</code>, <code>HisOrderRef</code></td><td>ยา / order ที่เขียนกลับไป</td><td>adapter (คืน id หลัง submit)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 8 -->
+<section id="s8">
+  <h2 class="sec">8. Connection Profile (Configuration-Driven)</h2>
+  <p>การเลือก HIS และช่องทางต่อ capability ทำผ่าน config ทั้งหมด — ไม่ hardcode. ตัวอย่างโครงสร้าง:</p>
+  <pre class="codeblock"><span class="c">// appsettings.{hospital}.json</span>
+{
+  <span class="s">"His"</span>: {
+    <span class="s">"Vendor"</span>: <span class="s">"haos"</span>,            <span class="c">// เลือก adapter assembly</span>
+    <span class="s">"Connection"</span>: {
+      <span class="s">"DbReadOnly"</span>: <span class="s">"Server=...;Database=HIS;..."</span>,   <span class="c">// Mode 1 (อ่าน)</span>
+      <span class="s">"ApiBaseUrl"</span>: <span class="s">"https://his-api.hospital.org"</span>,    <span class="c">// Mode 2</span>
+      <span class="s">"ApiAuth"</span>: { <span class="s">"Type"</span>: <span class="s">"OAuth2"</span>, <span class="s">"ClientId"</span>: <span class="s">"..."</span>, <span class="s">"Secret"</span>: <span class="s">"..."</span> }
+    },
+    <span class="s">"Inbound"</span>: {                    <span class="c">// Mode 3 (HIS push เข้า Smart IPD)</span>
+      <span class="s">"AdtWebhookEnabled"</span>: <span class="k">true</span>,
+      <span class="s">"SharedSecret"</span>: <span class="s">"..."</span>
+    },
+    <span class="s">"CapabilityModes"</span>: {           <span class="c">// override ช่องทางต่อ capability</span>
+      <span class="s">"GetAdmittedPatients"</span>: <span class="s">"InboundPush"</span>,
+      <span class="s">"GetLabResults"</span>: <span class="s">"DirectDb"</span>,
+      <span class="s">"SubmitMedicationOrder"</span>: <span class="s">"HisApi"</span>,
+      <span class="s">"DrugCatalog"</span>: <span class="s">"SyncCache"</span>
+    },
+    <span class="s">"Features"</span>: {                  <span class="c">// ปิด capability ที่ HIS นี้ไม่มี</span>
+      <span class="s">"VitalSignsOwnedBySmartIpd"</span>: <span class="k">true</span>,
+      <span class="s">"DispensingEnabled"</span>: <span class="k">false</span>
+    }
+  }
+}</pre>
+  <ul>
+    <li><strong>Capability ที่ HIS ไม่รองรับ</strong> → ปิดด้วย feature flag; Smart IPD ซ่อน/disable UI ส่วนนั้น หรือใช้ fallback (เช่น ถ้าไม่มี vital signs API → ให้ Smart IPD เก็บเอง = ย้ายเข้า Zone A)</li>
+    <li>หนึ่ง deployment = หนึ่งโรงพยาบาล = หนึ่ง profile</li>
+  </ul>
+</section>
+
+<!-- 9 -->
+<section id="s9">
+  <h2 class="sec">9. ขั้นตอนการเชื่อม HIS เจ้าใหม่ (Onboarding Playbook)</h2>
+  <ol>
+    <li><strong>ประเมิน capability ของ HIS</strong> — เทียบกับ Capability Catalog (ข้อ 5) ว่า HIS มี API/DB/ความสามารถ push อะไรบ้าง → กรอกตาราง gap</li>
+    <li><strong>เลือก Mode ต่อ capability</strong> — ตามกฎข้อ 4 (เขียน=HIS API, อ่านเยอะ=DB, event=push)</li>
+    <li><strong>สร้าง adapter project ใหม่</strong> เช่น <code>HAOS.SmartIPD.Adapters.VendorB</code> implement <code>IHisProvider</code> (เลียนแบบโครงสร้าง <code>HaosHisAdapter.*.cs</code> ทีละ domain)</li>
+    <li><strong>เขียน mapping layer</strong> — schema/payload ของ HIS ↔ Canonical DTO (ข้อ 6)</li>
+    <li><strong>ตั้ง identity resolution</strong> — กำหนดว่า AN/HN/UserId ของ HIS นี้หน้าตาอย่างไร (ข้อ 7)</li>
+    <li><strong>กำหนด connection profile</strong> (ข้อ 8)</li>
+    <li><strong>รัน Conformance Test Suite</strong> — ชุดทดสอบกลางที่ยิงทุก capability ต้องผ่าน "MUST" ทั้งหมด (ข้อ 11)</li>
+    <li><strong>UAT + go-live</strong> — เปิดทีละ domain (อ่านก่อน เขียนทีหลัง)</li>
+  </ol>
+  <div class="callout key">
+    <p><strong>หมายเหตุการ migrate ข้อมูล IPD เดิม:</strong> สำหรับโรงพยาบาลที่เคยใช้ HAOS — ต้องย้ายข้อมูลใน <code>TB_IPD_*</code>/<code>TBM_IPD_*</code> เข้า DB ของ Smart IPD (เป็น one-time migration). โรงพยาบาลใหม่ที่ใช้ HIS เจ้าอื่น เริ่มจาก DB เปล่าของ Smart IPD ได้เลย</p>
+  </div>
+</section>
+
+<!-- 10 -->
+<section id="s10">
+  <h2 class="sec">10. Cross-cutting Concerns</h2>
+  <h3>10.1 Security &amp; Auth</h3>
+  <ul>
+    <li><strong>Mode 1 (DB):</strong> ใช้ account อ่านอย่างเดียว + read replica; เก็บ credential ใน secret store ไม่ใช่ในโค้ด</li>
+    <li><strong>Mode 2 (HIS API):</strong> adapter รับผิดชอบ auth ของแต่ละ HIS (OAuth2 / API key / mTLS / SOAP WS-Security) — abstract ไว้ใน <code>IHisAuthProvider</code></li>
+    <li><strong>Mode 3 (inbound):</strong> verify signature/shared-secret/mTLS ของ payload ที่ HIS ส่งเข้ามา; rate limit</li>
+    <li>Smart IPD ยังคงมี auth ของตัวเอง (JWT) สำหรับผู้ใช้งาน — แยกจาก auth ที่คุยกับ HIS</li>
+  </ul>
+  <h3>10.2 Consistency &amp; Sync</h3>
+  <ul>
+    <li>ข้อมูล Zone B ที่ cache ไว้ (master data, admitted list) ต้องมีกลยุทธ์ invalidate — TTL หรือ event-driven (Mode 3)</li>
+    <li>การเขียน Zone C ต้อง <strong>idempotent</strong> + เก็บ <code>HisOrderRef</code> ที่ HIS คืนมา เพื่อกัน duplicate</li>
+    <li>กรณี HIS ล่ม: อ่าน (Zone B) ใช้ cache ค้างได้; เขียน (Zone C) เข้า outbox queue แล้ว retry</li>
+  </ul>
+  <h3>10.3 Error Handling &amp; Observability</h3>
+  <ul>
+    <li>นิยาม error กลางใน contract (เช่น <code>HisUnavailable</code>, <code>PatientNotFound</code>, <code>OrderRejected</code>) — adapter แปลง error ของ HIS เป็นชนิดกลาง</li>
+    <li>Log/trace ต่อ capability + ต่อ HIS เพื่อ debug การ integration</li>
+    <li>Circuit breaker / timeout ต่อ Mode 2/3</li>
+  </ul>
+</section>
+
+<!-- 11 -->
+<section id="s11">
+  <h2 class="sec">11. Conformance — ขั้นต่ำที่ HIS ต้องรองรับ</h2>
+  <h3><span class="pill req">MUST</span> — Minimum Viable Integration (Smart IPD ทำงานพื้นฐานได้)</h3>
+  <ul>
+    <li>รู้รายชื่อผู้ป่วยที่ admit อยู่ในวอร์ด + demographics + ADT events (admit/transfer/discharge)</li>
+    <li>Master data: ward/bed, drug catalog, lab/xray catalog, ICD, directory แพทย์/พยาบาล</li>
+    <li>อ่าน Lab + Xray results</li>
+    <li>เขียนกลับ orders (med/lab/xray) + รับ status feedback</li>
+  </ul>
+  <h3><span class="pill opt">OPTIONAL</span> — Enhanced</h3>
+  <ul>
+    <li>Dispensing/charge write-back, expense summary</li>
+    <li>Vital signs (ถ้าไม่มี → Smart IPD เก็บเอง)</li>
+    <li>Diagnosis/discharge write-back, patient picture, report data, OPD/IPD history</li>
+  </ul>
+  <p><strong>Conformance Test Suite:</strong> ชุดทดสอบกลาง (1 ชุด ใช้กับทุก adapter) ยิงทุก MUST capability ด้วยข้อมูลจำลอง แล้วตรวจว่าคืน Canonical DTO ถูก shape — adapter ผ่านชุดนี้ = พร้อม go-live</p>
+</section>
+
+<!-- 12 -->
+<section id="s12">
+  <h2 class="sec">12. สรุป — อะไรอยู่ที่ Smart IPD เอง vs ต้องใช้จาก HIS</h2>
+  <table>
+    <thead><tr><th>ส่วนงาน</th><th>เจ้าของ</th><th>ถ้าต้องใช้จาก HIS — ช่องทาง</th></tr></thead>
+    <tbody>
+      <tr><td>Doctor/Nurse Notes, Order Notes, eMAR, Nursing Care Plan, Admission Record, H&amp;P, Discharge Summary, Intake/Output, Med Reconcile, Focus Items</td><td><span class="pill own">Smart IPD</span></td><td>ใช้แค่ reference: HN/AN/UserId</td></tr>
+      <tr><td>FAIE master data, I/O master, Nurse note templates</td><td><span class="pill own">Smart IPD</span></td><td>—</td></tr>
+      <tr><td>Auth/JWT, AI Chat, Patient Tags, DICOM index</td><td><span class="pill own">Smart IPD</span></td><td>—</td></tr>
+      <tr><td>Admitted patients / ADT events</td><td><span class="pill hisapi">HIS</span></td><td><span class="pill ipdapi">Mode 3 push</span> หรือ <span class="pill db">Mode 1</span>/<span class="pill hisapi">Mode 2</span> poll</td></tr>
+      <tr><td>Patient demographics / admission card</td><td><span class="pill hisapi">HIS</span></td><td><span class="pill hisapi">Mode 2</span> / <span class="pill db">Mode 1</span></td></tr>
+      <tr><td>Master data (drug/lab/xray/ICD/ward), directory บุคลากร</td><td><span class="pill hisapi">HIS</span></td><td><span class="pill ipdapi">sync</span> / <span class="pill db">Mode 1</span> / <span class="pill hisapi">Mode 2</span></td></tr>
+      <tr><td>Lab / Xray / Vital results</td><td><span class="pill hisapi">HIS</span></td><td><span class="pill db">Mode 1</span> / <span class="pill hisapi">Mode 2</span></td></tr>
+      <tr><td>Orders submit + status, Dispensing, Diagnosis, Charge</td><td><span class="pill ipdapi">HIS (write-back)</span></td><td><span class="pill hisapi">Mode 2</span> (business logic ของ HIS)</td></tr>
+      <tr><td>Reports / PDF (drug sticker, cards, certificate)</td><td><span class="pill own">Smart IPD render</span></td><td>ดึง data ดิบผ่าน <span class="pill db">Mode 1</span>/<span class="pill hisapi">Mode 2</span></td></tr>
+    </tbody>
+  </table>
+  <div class="callout key">
+    <span class="lbl">บรรทัดเดียวจบ</span>
+    <p>Smart IPD <strong>เป็นเจ้าของ "สมุดบันทึกทางคลินิก IPD" ทั้งเล่ม</strong> และคุยกับ HIS เจ้าใดก็ได้ผ่าน contract <code>IHisProvider</code> เพื่อ (ก) <strong>อ่าน</strong>บริบทผู้ป่วย/master/ผลตรวจ และ (ข) <strong>เขียนกลับ</strong> order/charge — โดยแต่ละ HIS เลือกได้ว่าจะให้ Smart IPD ต่อผ่าน <span class="pill db">DB ตรง</span>, <span class="pill hisapi">API ของ HIS</span>, หรือ <span class="pill ipdapi">push เข้า API ของ Smart IPD</span> ตามความพร้อมของตน</p>
+  </div>
+</section>
+
+<footer>
+  Smart IPD — HIS Integration Specification (Draft v0.1) · สถาปัตยกรรม Port–Adapter ต่อยอดจาก IHisAdapter ที่มีอยู่ · คู่กับ SmartIPD-API-Ownership-Analysis
+</footer>
+
+</div>
+</body>
+</html>
