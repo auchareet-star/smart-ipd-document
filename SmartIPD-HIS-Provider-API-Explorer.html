@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart IPD — HIS Provider API Explorer (Swagger UI)</title>
+<link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+<style>
+  body{margin:0; font-family:"Segoe UI","Sarabun",Tahoma,sans-serif;}
+  .topbar{background:linear-gradient(135deg,#0a8f7f,#0a3069); color:#fff; padding:16px 24px;}
+  .topbar h1{margin:0; font-size:19px;}
+  .topbar p{margin:4px 0 0; font-size:12.5px; opacity:.9;}
+  .note{background:#fff8c5; border-bottom:1px solid #e3c373; color:#6b5400; padding:8px 24px; font-size:12.5px;}
+  #ui{max-width:1200px; margin:0 auto;}
+  .swagger-ui .info{margin:18px 0;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>Smart IPD — HIS Provider API Explorer</h1>
+  <p>contract สำหรับทีม HIS · เปิด/ลองยิง API ได้ในหน้านี้ · ดาวน์โหลด spec: SmartIPD-HIS-Provider-API.openapi.yaml</p>
+</div>
+<div class="note">ℹ️ หน้านี้โหลด Swagger UI จากอินเทอร์เน็ต (CDN) ครั้งแรก — ถ้าเปิดออฟไลน์แล้วว่างเปล่า ให้นำไฟล์ <b>.openapi.yaml</b> ไปเปิดที่ <b>editor.swagger.io</b> หรือ import เข้า Postman แทน</div>
+<div id="ui"></div>
+
+<script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin></script>
+<script src="https://unpkg.com/js-yaml@4/dist/js-yaml.min.js" crossorigin></script>
+<script type="text/yaml" id="spec">
+openapi: 3.0.3
+info:
+  title: Smart IPD — HIS Provider API
+  version: "2.1"
+  description: |
+    สัญญา (contract) ของ "สิ่งที่ HIS ต้องจัดให้ Smart IPD" — ครบทั้งการอ่าน (READ),
+    การเขียนกลับ (WRITE) และเหตุการณ์ (EVENT/webhook).
+    - path เป็นข้อเสนอ — HIS ตั้งชื่อจริงเป็นอะไรก็ได้ ขอแค่มีความสามารถนั้น
+    - READ ใช้ได้ทั้ง DB ตรง / API · WRITE ต้องผ่าน API ของ HIS · EVENT = HIS เรียกเข้า webhook ของ Smart IPD
+    - ระดับ: MUST = จำเป็น · MUST* = จำเป็นเมื่อใช้ฟีเจอร์นั้น
+servers:
+  - url: https://his.hospital.org/api/v1
+    description: HIS Provider API (paths /his)
+  - url: https://smartipd.hospital.org/api
+    description: Smart IPD Inbound webhooks (paths /webhooks)
+tags:
+  - { name: Patient, description: ผู้ป่วย & การรับเข้า }
+  - { name: Appointment, description: นัดหมาย }
+  - { name: MasterData, description: ข้อมูลตั้งต้น }
+  - { name: Results, description: ผลตรวจ }
+  - { name: VitalSigns, description: สัญญาณชีพ }
+  - { name: Orders, description: ส่งคำสั่งกลับ HIS }
+  - { name: "Webhooks (HIS to Smart IPD)", description: เหตุการณ์ที่ HIS push เข้ามา }
+security:
+  - bearerAuth: []
+  - apiKeyAuth: []
+paths:
+  /his/patients/admitted:
+    get:
+      tags: [Patient]
+      summary: รายชื่อผู้ป่วยที่นอนอยู่ในวอร์ด — MUST
+      operationId: getAdmittedPatients
+      parameters:
+        - { name: ward, in: query, required: false, schema: { type: string } }
+        - { name: doctor, in: query, required: false, schema: { type: string } }
+      responses:
+        "200":
+          description: รายการผู้ป่วย
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/AdmittedPatient" } }
+              example:
+                - { hn: "6712345", an: "AN680112", fullName: "นายสมชาย ใจดี", sex: "M", age: 58, wardCode: "WD03", bedCode: "BED12", attendingDoctorId: "D00123", attendingDoctorName: "นพ.สมหญิง รักษาดี", admitDateTime: "2025-01-12T09:20:00+07:00", status: "admitted" }
+  /his/patients/{an}:
+    get:
+      tags: [Patient]
+      summary: ข้อมูลตัวผู้ป่วย — MUST
+      operationId: getPatientInfo
+      parameters: [ { $ref: "#/components/parameters/AnPath" } ]
+      responses:
+        "200": { description: ข้อมูลผู้ป่วย, content: { application/json: { schema: { $ref: "#/components/schemas/PatientInfo" } } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /his/patients/{an}/admission-card:
+    get:
+      tags: [Patient]
+      summary: บัตรผู้ป่วยฉบับเต็ม — MUST
+      operationId: getPatientAdmissionCard
+      parameters: [ { $ref: "#/components/parameters/AnPath" } ]
+      responses:
+        "200":
+          description: บัตรผู้ป่วย
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PatientAdmissionCard" }
+              example:
+                hn: "6712345"
+                fullName: "นายสมชาย ใจดี"
+                sex: "M"
+                birthDate: "1967-03-15"
+                rightName: "บัตรทอง"
+                bloodGroup: "O"
+                allergies:
+                  - { name: "Penicillin", reaction: "ผื่นลมพิษ" }
+                currentDiagnosis:
+                  - { icdCode: "J18.9", description: "Pneumonia, unspecified" }
+                admission: { an: "AN680112", wardCode: "WD03", bedCode: "BED12", attendingDoctorId: "D00123" }
+  /his/appointments/slots:
+    get:
+      tags: [Appointment]
+      summary: ช่องเวลานัดว่าง — MUST*
+      operationId: getAppointmentSlots
+      parameters:
+        - { name: doctorId, in: query, required: false, schema: { type: string } }
+        - { name: date, in: query, required: false, schema: { type: string, format: date } }
+      responses:
+        "200": { description: ช่องเวลา, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/AppointmentSlot" } } } } }
+  /his/patients/{an}/appointments:
+    get:
+      tags: [Appointment]
+      summary: นัดของผู้ป่วย — MUST*
+      operationId: getPatientAppointments
+      parameters: [ { $ref: "#/components/parameters/AnPath" } ]
+      responses:
+        "200": { description: รายการนัด, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Appointment" } } } } }
+  /his/appointments:
+    post:
+      tags: [Appointment]
+      summary: สร้างนัด — MUST*
+      operationId: createAppointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AppointmentCreate" }
+            example: { an: "AN680112", appointDateTime: "2025-02-10T10:00:00+07:00", clinicCode: "MED-OPD", doctorId: "D00123", appointType: "follow-up" }
+      responses:
+        "201": { description: สำเร็จ, content: { application/json: { schema: { $ref: "#/components/schemas/Appointment" } } } }
+  /his/appointments/{appointId}:
+    patch:
+      tags: [Appointment]
+      summary: แก้/ยกเลิก/เลื่อนนัด — MUST*
+      operationId: updateAppointment
+      parameters: [ { name: appointId, in: path, required: true, schema: { type: string } } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AppointmentUpdate" }
+            example: { action: "POSTPONE", appointDateTime: "2025-02-17T10:00:00+07:00", reason: "ผู้ป่วยติดธุระ" }
+      responses:
+        "200": { description: สำเร็จ }
+  /his/master/{name}:
+    get:
+      tags: [MasterData]
+      summary: ข้อมูลตั้งต้นทั่วไป (wards/icd/discharge-types/organs/...) — MUST
+      operationId: getMaster
+      parameters: [ { name: name, in: path, required: true, schema: { type: string }, example: "icd" } ]
+      responses:
+        "200":
+          description: รายการ master
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/MasterItem" } }
+              example:
+                - { code: "WD03", name: "อายุรกรรม ตึก 3" }
+                - { code: "WD05", name: "ศัลยกรรม ตึก 5" }
+  /his/master/drugs:
+    get:
+      tags: [MasterData]
+      summary: บัญชียา / ค้นหายา — MUST
+      operationId: searchDrugs
+      parameters: [ { name: q, in: query, required: false, schema: { type: string } } ]
+      responses:
+        "200":
+          description: รายการยา
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Drug" } }
+              example:
+                - { drugCode: "DRG0045", tradeName: "Augmentin", genericName: "Amoxicillin/Clavulanic", dosageForm: "tablet", strength: "625 mg", route: "oral", unit: "เม็ด", price: 12.0, properties: [], isActive: true }
+  /his/master/drugs/{drugCode}:
+    get:
+      tags: [MasterData]
+      summary: รายละเอียดยา 1 รายการ — MUST
+      operationId: getDrugDetail
+      parameters: [ { name: drugCode, in: path, required: true, schema: { type: string } } ]
+      responses:
+        "200": { description: รายละเอียดยา, content: { application/json: { schema: { $ref: "#/components/schemas/Drug" } } } }
+  /his/master/labs:
+    get:
+      tags: [MasterData]
+      summary: บัญชีแล็บ — MUST
+      operationId: getLabCatalog
+      responses:
+        "200": { description: รายการแล็บ, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/CatalogItem" } } } } }
+  /his/master/xrays:
+    get:
+      tags: [MasterData]
+      summary: บัญชีเอกซเรย์ — MUST
+      operationId: getXrayCatalog
+      responses:
+        "200": { description: รายการเอกซเรย์, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/CatalogItem" } } } } }
+  /his/staff:
+    get:
+      tags: [MasterData]
+      summary: ทำเนียบบุคลากร — MUST
+      operationId: getStaff
+      parameters: [ { name: role, in: query, required: false, schema: { type: string, enum: [doctor, nurse, pharmacist] } } ]
+      responses:
+        "200":
+          description: รายชื่อบุคลากร
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Staff" } }
+              example:
+                - { userId: "D00123", fullName: "นพ.สมหญิง รักษาดี", role: "doctor", specialty: "อายุรกรรม", licenseNo: "ว.12345", isActive: true }
+  /his/patients/{an}/lab-results:
+    get:
+      tags: [Results]
+      summary: ผลแล็บ — MUST
+      operationId: getLabResults
+      parameters:
+        - { $ref: "#/components/parameters/AnPath" }
+        - { name: from, in: query, required: false, schema: { type: string, format: date } }
+        - { name: to, in: query, required: false, schema: { type: string, format: date } }
+      responses:
+        "200":
+          description: ผลแล็บ
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/LabResult" } }
+              example:
+                - { collectedDateTime: "2025-01-14T07:10:00+07:00", testName: "Hemoglobin", value: "9.8", unit: "g/dL", referenceRange: "12-16", abnormalFlag: "L", labGroup: "CBC" }
+  /his/patients/{an}/xray-results:
+    get:
+      tags: [Results]
+      summary: ผลเอกซเรย์ + ลิงก์ PACS — MUST
+      operationId: getXrayResults
+      parameters: [ { $ref: "#/components/parameters/AnPath" } ]
+      responses:
+        "200":
+          description: ผลเอกซเรย์
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/XrayResult" } }
+              example:
+                - { examDateTime: "2025-01-13T15:40:00+07:00", modality: "X-ray", examName: "Chest PA", reportText: "Patchy infiltration at RLL", reportStatus: "final", pacsUrl: "https://pacs.hospital.org/viewer?study=1.2.3.4" }
+  /his/patients/{an}/vitals:
+    get:
+      tags: [VitalSigns]
+      summary: อ่านสัญญาณชีพ — MUST*
+      operationId: getVitalSigns
+      parameters: [ { $ref: "#/components/parameters/AnPath" } ]
+      responses:
+        "200": { description: รายการสัญญาณชีพ, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/VitalSign" } } } } }
+    post:
+      tags: [VitalSigns]
+      summary: บันทึก/แก้สัญญาณชีพ — MUST*
+      operationId: addOrUpdateVitalSigns
+      parameters: [ { $ref: "#/components/parameters/AnPath" } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VitalSign" }
+            example: { recordedDateTime: "2025-01-14T06:00:00+07:00", bloodPressure: "128/82", pulse: 88, respiratoryRate: 20, temperature: 37.8, spo2: 96 }
+      responses:
+        "200": { description: บันทึกสำเร็จ }
+  /his/vitals/{id}:
+    delete:
+      tags: [VitalSigns]
+      summary: ลบสัญญาณชีพ — MUST*
+      operationId: deleteVitalSigns
+      parameters: [ { name: id, in: path, required: true, schema: { type: string } } ]
+      responses:
+        "204": { description: ลบสำเร็จ }
+  /his/orders:
+    post:
+      tags: [Orders]
+      summary: ส่งคำสั่ง → ตอบ orderId — MUST
+      operationId: submitOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OrderRequest" }
+            example: { an: "AN680112", orderType: "MEDICATION", itemCode: "DRG0045", dose: "1 เม็ด", route: "oral", frequency: "วันละ 3 ครั้ง หลังอาหาร", quantity: 30, ordererId: "D00123", orderMode: "CONTINUE" }
+      responses:
+        "201": { description: รับคำสั่งสำเร็จ, content: { application/json: { schema: { $ref: "#/components/schemas/OrderResponse" }, example: { orderId: "ORD78901", accepted: true } } } }
+        "422": { description: ถูกปฏิเสธ, content: { application/json: { schema: { $ref: "#/components/schemas/OrderResponse" }, example: { orderId: null, accepted: false, rejectReason: "ยานี้แพ้ (Penicillin)" } } } }
+  /his/orders/{orderId}:
+    patch:
+      tags: [Orders]
+      summary: แก้/ยกเลิก/พัก/กลับมาใช้คำสั่ง — MUST
+      operationId: updateOrder
+      parameters: [ { name: orderId, in: path, required: true, schema: { type: string } } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OrderUpdate" }
+            example: { action: "CANCEL", reason: "เปลี่ยนแผนการรักษา" }
+      responses:
+        "200": { description: สำเร็จ }
+  /webhooks/adt:
+    post:
+      tags: ["Webhooks (HIS to Smart IPD)"]
+      summary: เหตุการณ์ ADT (รับเข้า/ย้าย/จำหน่าย) — MUST
+      operationId: pushAdtEvent
+      servers: [ { url: https://smartipd.hospital.org/api } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdtEvent" }
+            example: { eventType: "TRANSFER", hn: "6712345", an: "AN680112", wardCode: "WD05", bedCode: "BED02", eventDateTime: "2025-01-14T13:05:00+07:00" }
+      responses:
+        "200": { description: รับเหตุการณ์แล้ว }
+  /webhooks/order-status:
+    post:
+      tags: ["Webhooks (HIS to Smart IPD)"]
+      summary: แจ้งสถานะคำสั่งกลับ — MUST
+      operationId: pushOrderStatus
+      servers: [ { url: https://smartipd.hospital.org/api } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OrderStatusEvent" }
+            example: { orderId: "ORD78901", status: "DISPENSED", statusDateTime: "2025-01-14T11:30:00+07:00" }
+      responses:
+        "200": { description: รับสถานะแล้ว }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+    apiKeyAuth: { type: apiKey, in: header, name: X-API-Key }
+  parameters:
+    AnPath: { name: an, in: path, required: true, schema: { type: string }, example: "AN680112", description: เลขการรับเข้านอน }
+  responses:
+    NotFound:
+      description: ไม่พบข้อมูล
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" }, example: { code: "PATIENT_NOT_FOUND", message: "ไม่พบผู้ป่วยตาม AN" } } }
+  schemas:
+    AdmittedPatient:
+      type: object
+      required: [hn, an, fullName, wardCode, bedCode, attendingDoctorId, admitDateTime, status]
+      properties:
+        hn: { type: string }
+        an: { type: string }
+        fullName: { type: string }
+        sex: { type: string, enum: [M, F, O] }
+        birthDate: { type: string, format: date }
+        age: { type: integer }
+        wardCode: { type: string }
+        bedCode: { type: string }
+        attendingDoctorId: { type: string }
+        attendingDoctorName: { type: string }
+        admitDateTime: { type: string, format: date-time }
+        status: { type: string }
+    PatientInfo:
+      type: object
+      required: [hn, fullName]
+      properties:
+        hn: { type: string }
+        fullName: { type: string }
+        sex: { type: string, enum: [M, F, O] }
+        birthDate: { type: string, format: date }
+        nationalId: { type: string }
+        rightCode: { type: string }
+        rightName: { type: string }
+        bloodGroup: { type: string }
+        allergies: { type: array, items: { $ref: "#/components/schemas/Allergy" } }
+    PatientAdmissionCard:
+      allOf:
+        - { $ref: "#/components/schemas/PatientInfo" }
+        - type: object
+          properties:
+            currentDiagnosis: { type: array, items: { $ref: "#/components/schemas/Diagnosis" } }
+            admission:
+              type: object
+              properties:
+                an: { type: string }
+                admitDateTime: { type: string, format: date-time }
+                wardCode: { type: string }
+                bedCode: { type: string }
+                attendingDoctorId: { type: string }
+    Allergy:
+      type: object
+      properties: { name: { type: string }, reaction: { type: string } }
+    Diagnosis:
+      type: object
+      properties: { icdCode: { type: string }, description: { type: string } }
+    AppointmentSlot:
+      type: object
+      properties: { slotDateTime: { type: string, format: date-time }, doctorId: { type: string }, clinicCode: { type: string }, available: { type: boolean } }
+    Appointment:
+      type: object
+      properties: { appointId: { type: string }, an: { type: string }, appointDateTime: { type: string, format: date-time }, doctorId: { type: string }, clinicCode: { type: string }, appointType: { type: string }, status: { type: string } }
+    AppointmentCreate:
+      type: object
+      required: [an, appointDateTime]
+      properties: { an: { type: string }, appointDateTime: { type: string, format: date-time }, doctorId: { type: string }, clinicCode: { type: string }, appointType: { type: string }, note: { type: string } }
+    AppointmentUpdate:
+      type: object
+      required: [action]
+      properties: { action: { type: string, enum: [UPDATE, CANCEL, POSTPONE] }, appointDateTime: { type: string, format: date-time }, reason: { type: string } }
+    MasterItem:
+      type: object
+      required: [code, name]
+      properties: { code: { type: string }, name: { type: string }, type: { type: string } }
+    CatalogItem:
+      type: object
+      required: [code, name]
+      properties: { code: { type: string }, name: { type: string }, group: { type: string }, price: { type: number } }
+    Drug:
+      type: object
+      required: [drugCode, genericName, isActive]
+      properties:
+        drugCode: { type: string }
+        tradeName: { type: string }
+        genericName: { type: string }
+        dosageForm: { type: string }
+        strength: { type: string }
+        route: { type: string }
+        unit: { type: string }
+        price: { type: number }
+        properties: { type: array, items: { type: string } }
+        isActive: { type: boolean }
+    Staff:
+      type: object
+      required: [userId, fullName, role]
+      properties: { userId: { type: string }, fullName: { type: string }, role: { type: string, enum: [doctor, nurse, pharmacist] }, specialty: { type: string }, licenseNo: { type: string }, isActive: { type: boolean } }
+    LabResult:
+      type: object
+      properties: { collectedDateTime: { type: string, format: date-time }, testName: { type: string }, value: { type: string }, unit: { type: string }, referenceRange: { type: string }, abnormalFlag: { type: string }, labGroup: { type: string } }
+    XrayResult:
+      type: object
+      properties: { examDateTime: { type: string, format: date-time }, modality: { type: string }, examName: { type: string }, reportText: { type: string }, reportStatus: { type: string }, pacsUrl: { type: string }, studyUid: { type: string } }
+    VitalSign:
+      type: object
+      properties: { id: { type: string }, recordedDateTime: { type: string, format: date-time }, bloodPressure: { type: string }, pulse: { type: integer }, respiratoryRate: { type: integer }, temperature: { type: number }, spo2: { type: integer } }
+    OrderRequest:
+      type: object
+      required: [an, orderType, itemCode, ordererId, orderMode]
+      properties:
+        an: { type: string }
+        orderType: { type: string, enum: [MEDICATION, LAB, XRAY, GENERAL] }
+        itemCode: { type: string }
+        dose: { type: string }
+        route: { type: string }
+        frequency: { type: string }
+        quantity: { type: number }
+        ordererId: { type: string }
+        orderMode: { type: string, enum: [ONE_DAY, CONTINUE] }
+    OrderResponse:
+      type: object
+      required: [accepted]
+      properties: { orderId: { type: string, nullable: true }, accepted: { type: boolean }, rejectReason: { type: string } }
+    OrderUpdate:
+      type: object
+      required: [action]
+      properties: { action: { type: string, enum: [UPDATE, CANCEL, HOLD, RESUME] }, reason: { type: string } }
+    AdtEvent:
+      type: object
+      required: [eventType, hn, an, eventDateTime]
+      properties: { eventType: { type: string, enum: [ADMIT, TRANSFER, DISCHARGE, CANCEL] }, hn: { type: string }, an: { type: string }, wardCode: { type: string }, bedCode: { type: string }, eventDateTime: { type: string, format: date-time } }
+    OrderStatusEvent:
+      type: object
+      required: [orderId, status, statusDateTime]
+      properties: { orderId: { type: string }, status: { type: string, enum: [RECEIVED, DISPENSED, COMPLETED, CANCELLED] }, statusDateTime: { type: string, format: date-time } }
+    Error:
+      type: object
+      properties: { code: { type: string }, message: { type: string } }
+</script>
+
+<script>
+  window.addEventListener('load', function(){
+    try {
+      var spec = jsyaml.load(document.getElementById('spec').textContent);
+      window.ui = SwaggerUIBundle({ spec: spec, dom_id: '#ui', deepLinking: true, defaultModelsExpandDepth: 1, docExpansion: 'list' });
+    } catch (e) {
+      document.getElementById('ui').innerHTML = '<p style="padding:24px;color:#c4322b">โหลด Swagger UI ไม่ได้ (อาจไม่มีอินเทอร์เน็ต) — กรุณาเปิดไฟล์ .openapi.yaml ที่ editor.swagger.io แทน</p>';
+    }
+  });
+</script>
+</body>
+</html>

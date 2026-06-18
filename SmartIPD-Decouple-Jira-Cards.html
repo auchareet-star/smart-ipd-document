@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jira Cards — แยก Smart IPD ออกจาก HIS (SA กึ่ง BA)</title>
+<style>
+  :root{
+    --bg:#f4f7fb; --card:#fff; --ink:#1f2733; --muted:#5b6675; --line:#dde3ea;
+    --ba:#0a6cf1; --babg:#e6f0fc; --sa:#137a3f; --sabg:#e7f6ec;
+    --epic:#7b3fe4; --epicbg:#f1eafd;
+    --p1:#0a8f7f; --p2:#0a6cf1; --p3:#9a6a00;
+    --hi:#c4322b; --hibg:#fdecea; --md:#9a6a00; --mdbg:#fff6df;
+    --warn:#9a6a00; --warnbg:#fff6df;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Segoe UI","Sarabun","Noto Sans Thai",Tahoma,sans-serif; line-height:1.6; font-size:15px;}
+  .wrap{max-width:1080px; margin:0 auto; padding:30px 18px 80px;}
+
+  header.doc{background:linear-gradient(135deg,#7b3fe4,#0a3069); color:#fff;
+    border-radius:16px; padding:30px 34px; margin-bottom:22px; box-shadow:0 6px 20px rgba(123,63,228,.22);}
+  header.doc .kicker{font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; opacity:.9;}
+  header.doc h1{margin:6px 0 8px; font-size:26px;}
+  header.doc p{margin:5px 0; opacity:.94; font-size:14px;}
+  header.doc .legend{margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;}
+  header.doc .legend span{background:rgba(255,255,255,.16); padding:4px 12px; border-radius:18px; font-size:12.5px;}
+
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 22px; margin-bottom:22px; box-shadow:0 1px 4px rgba(0,0,0,.04);}
+  .panel h2{margin:0 0 12px; font-size:18px;}
+  table{border-collapse:collapse; width:100%; font-size:13px;}
+  th,td{border:1px solid var(--line); padding:7px 10px; text-align:left; vertical-align:top;}
+  th{background:#eef3f9; font-weight:700;}
+  tbody tr:nth-child(even){background:#fafcfe;}
+  table.overview td a{color:var(--ba); text-decoration:none; font-weight:600;}
+
+  .pill{display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:700; white-space:nowrap;}
+  .pill.ba{background:var(--babg); color:var(--ba);} .pill.sa{background:var(--sabg); color:var(--sa);}
+  .pill.sp{background:#eceff3; color:#333;} .pill.hi{background:var(--hibg); color:var(--hi);} .pill.md{background:var(--mdbg); color:var(--md);}
+  .pill.epic{background:var(--epicbg); color:var(--epic);}
+  .pill.ph1{background:#dff3f0; color:var(--p1);} .pill.ph2{background:#e1edfd; color:var(--p2);} .pill.ph3{background:#fdf2da; color:var(--p3);}
+
+  .epiccard{background:var(--epicbg); border:1px solid #d4c2f5; border-left:6px solid var(--epic); border-radius:14px; padding:22px 26px; margin-bottom:24px;}
+  .epiccard h2{margin:0 0 4px; font-size:21px; color:var(--epic);}
+
+  .story{background:var(--card); border:1px solid var(--line); border-radius:14px; margin-bottom:18px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.04);}
+  .story.p1{border-left:6px solid var(--p1);} .story.p2{border-left:6px solid var(--p2);} .story.p3{border-left:6px solid var(--p3);}
+  .story .sh{padding:14px 20px; background:#f7f9fc; border-bottom:1px solid var(--line); display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .story .skey{font-family:"Cascadia Code",Consolas,monospace; font-weight:800; color:var(--epic); font-size:14px;}
+  .story .stitle{font-weight:800; font-size:16px;}
+  .story .sbadges{margin-left:auto; display:flex; gap:5px; flex-wrap:wrap;}
+  .story .sb{padding:14px 20px;}
+  .us{background:#f6f8fc; border-left:3px solid var(--ba); border-radius:8px; padding:10px 14px; font-style:italic; color:#33415a; margin:0 0 12px;}
+  .sec-lbl{font-size:11.5px; font-weight:800; letter-spacing:.03em; text-transform:uppercase; color:var(--muted); margin:14px 0 5px;}
+  ul.tasks, ul.ac{list-style:none; margin:6px 0; padding:0;}
+  ul.tasks li, ul.ac li{position:relative; padding:5px 8px 5px 28px; font-size:13.5px;}
+  ul.tasks li::before{content:'☐'; position:absolute; left:6px; top:4px; color:var(--muted); font-size:15px;}
+  ul.ac li.ba::before{content:'📋'; position:absolute; left:4px; top:5px; font-size:12px;}
+  ul.ac li.sa::before{content:'🔧'; position:absolute; left:4px; top:5px; font-size:12px;}
+  ul.ac li.gen::before{content:'✔'; position:absolute; left:6px; top:4px; color:var(--muted);}
+  .meta-row{font-size:13px; margin:8px 0 2px;} .meta-row b{color:var(--muted); font-weight:700;}
+  p{margin:8px 0;} code{font-family:"Cascadia Code",Consolas,monospace; font-size:12px; background:#f1f4f8; padding:1.5px 5px; border-radius:5px;}
+
+  h2.app{font-size:21px; margin:28px 0 10px; padding-bottom:10px; border-bottom:2px solid var(--line);}
+  h3.app{font-size:16px; margin:18px 0 6px;}
+  .appbox{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px 22px; margin-bottom:18px;}
+  .appbox ul{margin:6px 0; padding-left:20px;} .appbox li{margin:4px 0; font-size:13.5px;}
+  .callout{border-radius:10px; padding:12px 16px; margin:12px 0; border:1px solid; background:var(--warnbg); border-color:#e3c373; font-size:13.5px;}
+  footer{text-align:center; color:var(--muted); font-size:12.5px; margin-top:24px;}
+  @media print{ body{background:#fff;} .panel,.story,.epiccard,.appbox{box-shadow:none; break-inside:avoid;} }
+  @media(max-width:760px){ .story .sbadges{margin-left:0; width:100%;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="doc">
+  <div class="kicker">Jira Backlog · บทบาท SA กึ่ง BA</div>
+  <h1>แยก Smart IPD ออกจาก HIS — งานวิเคราะห์/ออกแบบ</h1>
+  <p>1 Epic + 12 Stories · แต่ละการ์ดมี User Story · Sub-tasks · Acceptance Criteria · Deliverables · DoD · Story Points</p>
+  <div class="legend">
+    <span>📋 = งานฝั่ง BA</span><span>🔧 = งานฝั่ง SA</span>
+    <span>เฟส 1 เข้าใจ · เฟส 2 ออกแบบ · เฟส 3 ส่งมอบ</span>
+  </div>
+</header>
+
+<!-- overview -->
+<div class="panel">
+  <h2>📋 Backlog Overview</h2>
+  <table class="overview">
+    <thead><tr><th>Key</th><th>Title</th><th>Type</th><th>SP</th><th>Priority</th><th>Phase</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#epic">EPIC</a></td><td>แยก Smart IPD ออกจาก HIS</td><td>Epic</td><td>—</td><td>Highest</td><td>—</td></tr>
+      <tr><td><a href="#saba-1">SABA-1</a></td><td>ความต้องการ &amp; Stakeholder</td><td>Story</td><td>5</td><td>Highest</td><td>1 เข้าใจ</td></tr>
+      <tr><td><a href="#saba-2">SABA-2</a></td><td>AS-IS → TO-BE process/data flow</td><td>Story</td><td>8</td><td>High</td><td>1 เข้าใจ</td></tr>
+      <tr><td><a href="#saba-3">SABA-3</a></td><td>Data Ownership Policy &amp; Business Rules</td><td>Story</td><td>8</td><td>High</td><td>1 เข้าใจ</td></tr>
+      <tr><td><a href="#saba-4">SABA-4</a></td><td>Gap &amp; Impact Analysis</td><td>Story</td><td>5</td><td>High</td><td>1 เข้าใจ</td></tr>
+      <tr><td><a href="#saba-5">SABA-5</a></td><td>Schema+Migration: <code>TBM_IPD_*</code></td><td>Story</td><td>8</td><td>High</td><td>2 ออกแบบ</td></tr>
+      <tr><td><a href="#saba-6">SABA-6</a></td><td>Schema+Migration: <code>TB_IPD_*</code></td><td>Story</td><td>13</td><td>High</td><td>2 ออกแบบ</td></tr>
+      <tr><td><a href="#saba-7">SABA-7</a></td><td>Cross-system Identity / Reference</td><td>Story</td><td>5</td><td>Medium</td><td>2 ออกแบบ</td></tr>
+      <tr><td><a href="#saba-8">SABA-8</a></td><td>HIS Read Contract</td><td>Story</td><td>8</td><td>High</td><td>2 ออกแบบ</td></tr>
+      <tr><td><a href="#saba-9">SABA-9</a></td><td>HIS Write-back &amp; Event Contract</td><td>Story</td><td>8</td><td>High</td><td>2 ออกแบบ</td></tr>
+      <tr><td><a href="#saba-10">SABA-10</a></td><td>Data Migration &amp; Cutover Plan</td><td>Story</td><td>8</td><td>Medium</td><td>3 ส่งมอบ</td></tr>
+      <tr><td><a href="#saba-11">SABA-11</a></td><td>Sync/Cache &amp; Anti-corruption</td><td>Story</td><td>5</td><td>Medium</td><td>3 ส่งมอบ</td></tr>
+      <tr><td><a href="#saba-12">SABA-12</a></td><td>Conformance + UAT Plan</td><td>Story</td><td>5</td><td>Medium</td><td>3 ส่งมอบ</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- EPIC -->
+<div class="epiccard" id="epic">
+  <h2>🟪 EPIC — แยก Smart IPD ออกจาก HIS ให้เป็นระบบอิสระ (HIS-agnostic)</h2>
+  <div class="meta-row"><b>Type:</b> Epic · <b>Priority:</b> Highest · <b>Component:</b> SA/BA, Smart IPD, HIS Integration · <b>Labels:</b> <code>decouple</code> <code>his-integration</code> <code>architecture</code></div>
+  <div class="sec-lbl">Goal</div>
+  <p>ออกแบบให้ Smart IPD เป็นเจ้าของข้อมูลคลินิกผู้ป่วยใน (IPD) เอง และเชื่อมกับ HIS เจ้าใดก็ได้ผ่าน contract มาตรฐานจุดเดียว เพื่อขาย/ติดตั้งกับโรงพยาบาลที่ใช้ HIS เจ้าอื่นได้</p>
+  <div class="sec-lbl">Business Context / Problem</div>
+  <ul style="margin:4px 0;padding-left:20px;font-size:13.5px">
+    <li>ข้อมูลคลินิก IPD อยู่ในฐานข้อมูล HAOS ทั้งหมด (<code>TB_IPD_*</code>/<code>TBM_IPD_*</code> ~55 ตาราง ที่สร้างตอนพัฒนา Smart IPD)</li>
+    <li>Smart IPD เข้าถึง HAOS 2 ทาง: HAOS API (Kiota) + ต่อ HAOS DB ตรง → ผูกกับ HAOS แยกไม่ได้</li>
+  </ul>
+  <div class="sec-lbl">Business Value / Success Metrics</div>
+  <ul style="margin:4px 0;padding-left:20px;font-size:13.5px">
+    <li>เปิดตลาดไป รพ. ที่ใช้ HIS เจ้าอื่น · ลดการพึ่งพา vendor เดียว</li>
+    <li>ตัวชี้วัด: เชื่อม HIS เจ้าใหม่ได้ภายใน X สัปดาห์/เจ้า โดยไม่ต้องแก้ core</li>
+  </ul>
+  <div class="sec-lbl">Deliverables</div>
+  <ul style="margin:4px 0;padding-left:20px;font-size:13.5px">
+    <li>📋 BRD/SRS (ความต้องการ + stakeholder + business rules + gap/impact)</li>
+    <li>🔧 System &amp; Data Design (schema Smart IPD + ER diagram, HIS read/write contract, identity model)</li>
+    <li>🔧 Migration &amp; Cutover plan · 📋🔧 Conformance &amp; UAT plan</li>
+  </ul>
+  <div class="sec-lbl">Definition of Done</div>
+  <p style="font-size:13.5px">เอกสารผ่าน review จาก Business Owner, Tech Lead, DBA, ตัวแทนทีม HIS · รายการตาราง Smart IPD-owned + ข้อมูล HIS ได้รับการยืนยัน · พร้อมส่งต่อทีม Dev</p>
+</div>
+
+<!-- ===== STORIES ===== -->
+
+<div class="story p1" id="saba-1">
+  <div class="sh"><span class="skey">SABA-1</span><span class="stitle">รวบรวมความต้องการ &amp; วิเคราะห์ผู้มีส่วนได้เสีย</span>
+    <span class="sbadges"><span class="pill sp">SP 5</span><span class="pill hi">Highest</span><span class="pill ph1">เฟส 1</span></span></div>
+  <div class="sb">
+    <p class="us">ในฐานะ <b>ทีมโครงการ</b> เราต้องการ <b>เข้าใจวัตถุประสงค์ ขอบเขต และผู้มีส่วนได้เสีย</b> เพื่อให้ <b>การออกแบบในเฟสถัดไปตอบโจทย์ธุรกิจจริง</b></p>
+    <div class="sec-lbl">Background</div><p>การ์ดตั้งต้น — lock เป้าหมาย/ขอบเขตเชิงธุรกิจก่อนลงเทคนิค</p>
+    <div class="sec-lbl">Sub-tasks</div>
+    <ul class="tasks"><li>จัด workshop/สัมภาษณ์ Business Owner + ตัวแทนผู้ใช้</li><li>จัดทำ Stakeholder map + RACI</li><li>รวบรวม business requirements + objectives + success metrics</li><li>นิยาม scope/out-of-scope + ข้อจำกัด (กฎหมาย/PDPA/เวชระเบียน/การเงิน)</li><li>นัด review + sign-off</li></ul>
+    <div class="sec-lbl">Acceptance Criteria</div>
+    <ul class="ac"><li class="ba">Stakeholder map ครบ: Business Owner, รพ.ผู้ใช้, แพทย์/พยาบาล/เภสัชกร, ทีม HIS (HAOS+เจ้าอื่น), DBA, Dev</li><li class="ba">รายการ business requirements + objective + success metrics ที่วัดได้</li><li class="ba">scope/out-of-scope + รายการข้อจำกัด</li><li class="sa">รายการ assumption/constraint เชิงเทคนิคเบื้องต้น</li><li class="gen">ผ่าน sign-off จาก Business Owner</li></ul>
+    <div class="meta-row"><b>Deliverables:</b> Stakeholder map, Requirement list, Project scope statement</div>
+    <div class="meta-row"><b>Dependencies:</b> — (เริ่มได้เลย) · <b>DoD:</b> เอกสาร review + sign-off</div>
+  </div>
+</div>
+
+<div class="story p1" id="saba-2">
+  <div class="sh"><span class="skey">SABA-2</span><span class="stitle">วิเคราะห์กระบวนการ &amp; การไหลข้อมูล AS-IS → TO-BE</span>
+    <span class="sbadges"><span class="pill sp">SP 8</span><span class="pill md">High</span><span class="pill ph1">เฟส 1</span></span></div>
+  <div class="sb">
+    <p class="us">ในฐานะ <b>SA/BA</b> ฉันต้องการ <b>เห็นภาพกระบวนการและการไหลข้อมูลทั้งปัจจุบันและเป้าหมาย</b> เพื่อ <b>ระบุว่าอะไรต้องเปลี่ยน ทั้งเชิงผู้ใช้และระบบ</b></p>
+    <div class="sec-lbl">Background</div><p>ปัจจุบัน Smart IPD พึ่ง HAOS ทุกอย่าง — เทียบกับ TO-BE ที่ Smart IPD เป็นเจ้าของข้อมูล IPD</p>
+    <div class="sec-lbl">Sub-tasks</div>
+    <ul class="tasks"><li>วาด Process flow AS-IS ของ flow หลัก</li><li>วาด Process flow TO-BE + ระบุจุดที่ผู้ใช้ทำงานเปลี่ยน</li><li>วาด Data flow diagram TO-BE (อ่าน/เขียน/event)</li><li>ตรวจสอบความสอดคล้องกับเอกสารภาพรวม</li></ul>
+    <div class="sec-lbl">Acceptance Criteria</div>
+    <ul class="ac"><li class="ba">Process flow AS-IS/TO-BE ครบ: เปิดกระดาน, สั่งยา→จ่ายยา, บันทึกการดูแล, นัด follow-up, จำหน่าย</li><li class="ba">ระบุจุดที่ผู้ใช้ทำงานเปลี่ยน (สำหรับ training/change mgmt)</li><li class="sa">Data flow diagram TO-BE ชัดเจน (ทิศทาง + ช่องทาง)</li><li class="gen">สอดคล้องกับ <code>SmartIPD-HIS-Integration-Overview.html</code></li></ul>
+    <div class="meta-row"><b>Deliverables:</b> Process flow (AS-IS/TO-BE), Data flow diagram</div>
+    <div class="meta-row"><b>Dependencies:</b> SABA-1 · <b>DoD:</b> diagram ผ่าน review (Business Owner + Tech Lead)</div>
+  </div>
+</div>
+
+<div class="story p1" id="saba-3">
+  <div class="sh"><span class="skey">SABA-3</span><span class="stitle">นโยบายความเป็นเจ้าของข้อมูล &amp; Business Rules (Zone A/B/C)</span>
+    <span class="sbadges"><span class="pill sp">SP 8</span><span class="pill md">High</span><span class="pill ph1">เฟส 1</span></span></div>
+  <div class="sb">
+    <p class="us">ในฐานะ <b>SA/BA</b> ฉันต้องการ <b>กฎที่ชัดเจนว่าข้อมูลใดเป็นของใครและทำไม</b> เพื่อ <b>ใช้เป็นฐานการออกแบบ schema และ contract ทั้งหมด</b></p>
+    <div class="sec-lbl">Background</div><p>หัวใจของโครงการ — แปลงเหตุผลธุรกิจ/กฎหมาย เป็นการจำแนกข้อมูล 3 โซน (A เป็นของ Smart IPD, B อ่านจาก HIS, C เขียนกลับ HIS)</p>
+    <div class="sec-lbl">Sub-tasks</div>
+    <ul class="tasks"><li>รวบรวม business rules ความเป็นเจ้าของ (charge ผ่าน HIS, เวชระเบียน, สิทธิแก้ master)</li><li>จำแนกทุกตาราง/ข้อมูลเป็นโซน A/B/C + เหตุผล</li><li>ยืนยันรายการ <code>TB_IPD_*</code>/<code>TBM_IPD_*</code> กับ DBA</li><li>ยืนยันรายการข้อมูลจาก HIS</li><li>review 3 ฝ่าย</li></ul>
+    <div class="sec-lbl">Acceptance Criteria</div>
+    <ul class="ac"><li class="ba">เอกสาร business rules + เหตุผลแต่ละข้อ</li><li class="sa">ทุกข้อมูลถูกจำแนกโซน A/B/C ครบ (mapping table)</li><li class="sa">ยืนยัน <code>TB_IPD_*</code> (~33) + <code>TBM_IPD_*</code> (~22) + รายการ HIS ครบ</li><li class="gen">ผ่าน review (Business/DBA/Tech Lead)</li></ul>
+    <div class="meta-row"><b>Deliverables:</b> Data Ownership Policy, Business Rules doc, Zone A/B/C mapping</div>
+    <div class="meta-row"><b>Dependencies:</b> SABA-1 · <b>Reference:</b> <code>SmartIPD-API-Ownership-Analysis.html</code> · <b>DoD:</b> sign-off</div>
+  </div>
+</div>
+
+<div class="story p1" id="saba-4">
+  <div class="sh"><span class="skey">SABA-4</span><span class="stitle">Gap &amp; Impact Analysis</span>
+    <span class="sbadges"><span class="pill sp">SP 5</span><span class="pill md">High</span><span class="pill ph1">เฟส 1</span></span></div>
+  <div class="sb">
+    <p class="us">ในฐานะ <b>Business Owner</b> ฉันต้องการ <b>เห็นผลกระทบและความเสี่ยงของการแยกระบบ</b> เพื่อ <b>ตัดสินใจและวางแผนรับมือก่อนเริ่มพัฒนา</b></p>
+    <div class="sec-lbl">Sub-tasks</div>
+    <ul class="tasks"><li>ทำ Gap/Impact matrix (workflow ผู้ใช้, operation รพ., รายงาน, การเงิน/เคลม)</li><li>แยกผลกระทบ รพ.เดิม (HAOS) vs รพ.ใหม่</li><li>จัดทำ Risk register + mitigation</li><li>ร่างข้อเสนอ change management / training</li></ul>
+    <div class="sec-lbl">Acceptance Criteria</div>
+    <ul class="ac"><li class="ba">Gap/Impact matrix ครบทุกด้าน</li><li class="ba">แยกผลกระทบ รพ.เดิม vs รพ.ใหม่</li><li class="ba">Risk register + แนวทางลดความเสี่ยง (HIS ไม่มี API, integrity ข้ามฐาน, downtime)</li><li class="ba">ข้อเสนอ change management/training</li></ul>
+    <div class="meta-row"><b>Deliverables:</b> Gap/Impact matrix, Risk register, Change mgmt outline</div>
+    <div class="meta-row"><b>Dependencies:</b> SABA-2, SABA-3 · <b>DoD:</b> review (Business Owner + PM)</div>
+  </div>
+</div>
+
+<div class="story p2" id="saba-5">
+  <div class="sh"><span class="skey">SABA-5</span><span class="stitle">ออกแบบ Schema + Migration: Master/Config (<code>TBM_IPD_*</code>)</span>
+    <span class="sbadges"><span class="pill sp">SP 8</span><span class="pill md">High</span><span class="pill ph2">เฟส 2</span></span></div>
+  <div class="sb">
+    <p class="us">ในฐานะ <b>SA</b> ฉันต้องการ <b>ออกแบบ schema ของ master/config IPD ในฐานข้อมูล Smart IPD</b> เพื่อ <b>ตัด master ออกจาก HAOS เป็นกลุ่มแรก (coupling ต่ำสุด)</b></p>
+    <div class="sec-lbl">Background</div><p><code>TBM_IPD_*</code> ไม่ผูกข้อมูลผู้ป่วย (มีแค่ FK ผู้สร้าง/แก้ไข) → quick win</p>
+    <div class="sec-lbl">Sub-tasks</div>
+    <ul class="tasks"><li>ออกแบบ ER diagram + DDL ของทุกตาราง <code>TBM_IPD_*</code></li><li>เปลี่ยน FK <code>UserCreated/Modified</code> เป็น reference value</li><li>ระบุ business owner ของ master แต่ละชุด</li><li>ร่างสคริปต์ migration</li><li>ยืนยันว่าตัดออกจาก HAOS ได้</li></ul>
+    <div class="sec-lbl">Acceptance Criteria</div>
+    <ul class="ac"><li class="sa">ER diagram + DDL ครบ (ภาคผนวก A.1)</li><li class="sa">ไม่มี FK ข้ามฐาน — ใช้ reference value</li><li class="sa">สคริปต์ migration + verification (counts/checksums)</li><li class="ba">ระบุ business owner + ยืนยัน HAOS ตัดได้</li><li class="gen">ผ่าน review (DBA + Tech Lead)</li></ul>
+    <div class="meta-row"><b>Deliverables:</b> ER diagram, DDL, migration script (master)</div>
+    <div class="meta-row"><b>Dependencies:</b> SABA-3 · <b>DoD:</b> design + script ผ่าน review</div>
+  </div>
+</div>
+
+<div class="story p2" id="saba-6">
+  <div class="sh"><span class="skey">SABA-6</span><span class="stitle">ออกแบบ Schema + Migration: Transactional (<code>TB_IPD_*</code>)</span>
+    <span class="sbadges"><span class="pill sp">SP 13</span><span class="pill md">High</span><span class="pill ph2">เฟส 2</span></span></div>
+  <div class="sb">
+    <p class="us">ในฐานะ <b>SA</b> ฉันต้องการ <b>ออกแบบ schema ของเอกสารคลินิก IPD ในฐานข้อมูล Smart IPD</b> เพื่อ <b>ให้ Smart IPD เป็นเจ้าของเนื้อหาการดูแลผู้ป่วยในทั้งหมด</b></p>
+    <div class="sec-lbl">Background</div><p><code>TB_IPD_*</code> = บันทึกแพทย์/พยาบาล, คำสั่ง, eMAR, แผนการพยาบาล, รับผู้ป่วยใหม่, สรุปจำหน่าย, med reconcile, I/O records — ผูกแกน HIS ผ่าน AdmitId/PatientId/UserId</p>
+    <div class="sec-lbl">Sub-tasks</div>
+    <ul class="tasks"><li>ออกแบบ ER diagram + DDL ของทุกตาราง <code>TB_IPD_*</code> (รวม extension/child)</li><li>เปลี่ยน FK ข้ามฐาน → reference value (ตาม SABA-7)</li><li>ออกแบบจัดการตารางผูกแน่น (<code>TB_IPD_DISPENSING_*</code> ↔ drug/finance)</li><li>ยืนยันกับธุรกิจว่าเอกสารใดต้องสำเนา/ส่งกลับ HIS</li><li>ร่างสคริปต์ migration + กลยุทธ์ integrity</li></ul>
+    <div class="sec-lbl">Acceptance Criteria</div>
+    <ul class="ac"><li class="sa">ER diagram + DDL ครบทุกตาราง (ภาคผนวก A.2)</li><li class="sa">ไม่มี DB-level FK ข้ามฐาน — ใช้ <code>HisAdmissionRef/HisPatientRef/HisUserRef</code></li><li class="sa">แนวทางจัดการตารางผูกการเงิน/ยา + migration + integrity</li><li class="ba">ยืนยันรายการเอกสารที่ต้องส่งกลับ HIS (โยง SABA-9)</li><li class="gen">ผ่าน review (DBA + Tech Lead)</li></ul>
+    <div class="meta-row"><b>Deliverables:</b> ER diagram, DDL, migration script (transactional)</div>
+    <div class="meta-row"><b>Dependencies:</b> SABA-3, SABA-5, SABA-7 · <b>DoD:</b> design + script ผ่าน review</div>
+  </div>
+</div>
+
+<div class="story p2" id="saba-7">
+  <div class="sh"><span class="skey">SABA-7</span><span class="stitle">ออกแบบ Cross-system Identity / Reference</span>
+    <span class="sbadges"><span class="pill sp">SP 5</span><span class="pill md">Medium</span><span class="pill ph2">เฟส 2</span></span></div>
+  <div class="sb">
+    <p class="us">ในฐานะ <b>SA</b> ฉันต้องการ <b>วิธีอ้างอิงผู้ป่วย/การรับเข้า/ผู้ใช้ข้ามระบบแบบ opaque</b> เพื่อ <b>ไม่ผูก FK ข้ามฐาน และรองรับ HIS เจ้าอื่น</b></p>
+    <div class="sec-lbl">Sub-tasks</div>
+    <ul class="tasks"><li>นิยาม reference key มาตรฐาน + ชนิดข้อมูล</li><li>กำหนดวิธี validate ที่ระดับ application</li><li>ออกแบบ correlation/mapping สำหรับ HIS ต่างรูปแบบ</li><li>ระบุ business rule ของ key (AN ซ้ำข้ามปีงบ?)</li></ul>
+    <div class="sec-lbl">Acceptance Criteria</div>
+    <ul class="ac"><li class="sa">นิยาม <code>HisPatientRef(HN)</code>, <code>HisAdmissionRef(AN)</code>, <code>HisUserRef</code>, <code>HisDrugRef</code>, <code>HisOrderRef</code></li><li class="sa">เก็บเป็นค่า ไม่ใช่ FK; validate ผ่าน <code>IHisProvider.PatientExists()</code></li><li class="sa">correlation strategy รองรับ HIS เจ้าอื่น</li><li class="ba">business rule ของ identifier ได้รับการยืนยัน</li></ul>
+    <div class="meta-row"><b>Deliverables:</b> Identity/Reference design doc · <b>Dependencies:</b> SABA-3 · <b>DoD:</b> review (Tech Lead)</div>
+  </div>
+</div>
+
+<div class="story p2" id="saba-8">
+  <div class="sh"><span class="skey">SABA-8</span><span class="stitle">นิยาม HIS Read Contract (ข้อมูลที่ Smart IPD อ่านจาก HIS)</span>
+    <span class="sbadges"><span class="pill sp">SP 8</span><span class="pill md">High</span><span class="pill ph2">เฟส 2</span></span></div>
+  <div class="sb">
+    <p class="us">ในฐานะ <b>SA/BA</b> ฉันต้องการ <b>contract มาตรฐานของข้อมูลที่ดึงจาก HIS</b> เพื่อ <b>ให้ HIS เจ้าใดก็จัดข้อมูลให้ได้ตามรูปแบบเดียวกัน</b></p>
+    <div class="sec-lbl">Sub-tasks</div>
+    <ul class="tasks"><li>รวบรวม operation อ่าน + จัดระดับ MUST/OPT</li><li>นิยาม canonical DTO + fields ขั้นต่ำ</li><li>ระบุช่องทาง (DB/API/push)</li><li>ประสานทีม HIS ยืนยัน feasibility</li><li>แยก master ที่ Smart IPD เป็นเจ้าของ</li></ul>
+    <div class="sec-lbl">Acceptance Criteria</div>
+    <ul class="ac"><li class="sa">รายการ operation อ่านครบ + MUST/OPT + fields + ช่องทาง (ภาคผนวก B.1)</li><li class="sa">canonical DTO นิยามชัด (patient, drug, lab/xray, result, directory)</li><li class="ba">ทีม HIS ยืนยันจัดข้อมูลได้จริง (feasibility log)</li><li class="sa">ระบุ master ที่ Smart IPD owns</li></ul>
+    <div class="meta-row"><b>Deliverables:</b> HIS Read Contract spec, Canonical DTO definitions</div>
+    <div class="meta-row"><b>Dependencies:</b> SABA-3 · <b>Reference:</b> <code>SmartIPD-HIS-Provider-API-Spec.html</code> ข้อ 2–8 · <b>DoD:</b> review + feasibility</div>
+  </div>
+</div>
+
+<div class="story p2" id="saba-9">
+  <div class="sh"><span class="skey">SABA-9</span><span class="stitle">นิยาม HIS Write-back &amp; Event Contract</span>
+    <span class="sbadges"><span class="pill sp">SP 8</span><span class="pill md">High</span><span class="pill ph2">เฟส 2</span></span></div>
+  <div class="sb">
+    <p class="us">ในฐานะ <b>SA/BA</b> ฉันต้องการ <b>contract ของการเขียนกลับและเหตุการณ์กับ HIS</b> เพื่อ <b>ให้คำสั่ง/ค่าใช้จ่าย/นัด/สถานะ ไหลเข้าระบบกลางของ HIS อย่างถูกต้อง</b></p>
+    <div class="sec-lbl">Sub-tasks</div>
+    <ul class="tasks"><li>รวบรวม write-back operation + fields + ระดับ</li><li>รวบรวม EVENT ที่ HIS ต้อง push</li><li>กำหนด business rule (charge/จ่ายยาผ่าน HIS เท่านั้น) + idempotency</li><li>แยก POST ที่เป็น "ค้นหา" ออกจาก write จริง</li><li>ประสานทีม HIS เรื่องช่องทาง write + ADT push</li></ul>
+    <div class="sec-lbl">Acceptance Criteria</div>
+    <ul class="ac"><li class="sa">รายการ write-back ครบ: ส่งคำสั่ง (→ Finance/Drug), แก้/ยกเลิก/พัก, จ่ายยา/ค่าใช้จ่าย, นัดหมาย, สัญญาณชีพ, วินิจฉัย/สถานะจำหน่าย (ภาคผนวก B.2)</li><li class="sa">รายการ EVENT: ADT, order status feedback</li><li class="ba">business rule + idempotency ด้วย <code>orderId</code> ยืนยันแล้ว</li><li class="sa">ระบุ POST-search = READ</li></ul>
+    <div class="meta-row"><b>Deliverables:</b> HIS Write-back &amp; Event Contract spec</div>
+    <div class="meta-row"><b>Dependencies:</b> SABA-3, SABA-7 · <b>Reference:</b> <code>SmartIPD-HIS-Provider-API-Spec.html</code> ข้อ 3,8,9,10 · <b>DoD:</b> review + feasibility</div>
+  </div>
+</div>
+
+<div class="story p3" id="saba-10">
+  <div class="sh"><span class="skey">SABA-10</span><span class="stitle">Data Migration &amp; Cutover Plan</span>
+    <span class="sbadges"><span class="pill sp">SP 8</span><span class="pill md">Medium</span><span class="pill ph3">เฟส 3</span></span></div>
+  <div class="sb">
+    <p class="us">ในฐานะ <b>ทีมโครงการ</b> เราต้องการ <b>แผนย้ายข้อมูลและสลับระบบที่ปลอดภัย</b> เพื่อ <b>ให้ รพ. ที่ใช้ HAOS เดิมเปลี่ยนมาใช้ Smart IPD แยกได้โดยไม่สูญข้อมูล</b></p>
+    <div class="sec-lbl">Sub-tasks</div>
+    <ul class="tasks"><li>field-by-field mapping (HAOS → Smart IPD) ทุกตาราง</li><li>กำหนดลำดับการย้าย (master ก่อน → transaction) + reference key</li><li>ออกแบบ cutover (downtime / dual-write / rollback)</li><li>วิธี verify (counts, checksums, sampling)</li><li>communication plan + downtime window + go/no-go</li></ul>
+    <div class="sec-lbl">Acceptance Criteria</div>
+    <ul class="ac"><li class="sa">mapping field-by-field ครบ + ลำดับการย้าย</li><li class="sa">กลยุทธ์ cutover + rollback + วิธี verify</li><li class="ba">communication plan + downtime window + go/no-go กับ รพ.</li><li class="ba">รพ.ใหม่เริ่มจาก DB เปล่าได้ทันที</li></ul>
+    <div class="meta-row"><b>Deliverables:</b> Migration mapping, Cutover &amp; rollback plan</div>
+    <div class="meta-row"><b>Dependencies:</b> SABA-5, SABA-6 · <b>DoD:</b> review (DBA + PM + Business Owner)</div>
+  </div>
+</div>
+
+<div class="story p3" id="saba-11">
+  <div class="sh"><span class="skey">SABA-11</span><span class="stitle">ออกแบบ Sync / Cache &amp; Anti-corruption Layer</span>
+    <span class="sbadges"><span class="pill sp">SP 5</span><span class="pill md">Medium</span><span class="pill ph3">เฟส 3</span></span></div>
+  <div class="sb">
+    <p class="us">ในฐานะ <b>SA</b> ฉันต้องการ <b>นำข้อมูล HIS มาใช้แบบไม่ผูกโครงสร้างภายใน + ทนเมื่อ HIS ล่ม</b> เพื่อ <b>ความเสถียรและบำรุงรักษาง่าย</b></p>
+    <div class="sec-lbl">Sub-tasks</div>
+    <ul class="tasks"><li>ออกแบบ anti-corruption layer (HIS payload → canonical DTO)</li><li>ออกแบบ cache master (TTL / event-driven)</li><li>พฤติกรรมเมื่อ HIS ออฟไลน์ (READ cache, WRITE outbox+retry)</li><li>นิยาม error กลาง</li><li>business rule ความสด (admitted list สดแค่ไหน)</li></ul>
+    <div class="sec-lbl">Acceptance Criteria</div>
+    <ul class="ac"><li class="sa">anti-corruption layer design</li><li class="sa">cache/invalidation + offline behavior (cache + outbox)</li><li class="sa">error กลาง (HisUnavailable, PatientNotFound, OrderRejected)</li><li class="ba">business rule ความสดของข้อมูล</li></ul>
+    <div class="meta-row"><b>Deliverables:</b> Resilience &amp; Sync design doc · <b>Dependencies:</b> SABA-8, SABA-9 · <b>DoD:</b> review (Tech Lead)</div>
+  </div>
+</div>
+
+<div class="story p3" id="saba-12">
+  <div class="sh"><span class="skey">SABA-12</span><span class="stitle">Conformance + UAT Plan (เชื่อม HIS เจ้าใหม่)</span>
+    <span class="sbadges"><span class="pill sp">SP 5</span><span class="pill md">Medium</span><span class="pill ph3">เฟส 3</span></span></div>
+  <div class="sb">
+    <p class="us">ในฐานะ <b>ทีมโครงการ</b> เราต้องการ <b>ชุดทดสอบที่พิสูจน์ว่า HIS เจ้าใหม่เชื่อมได้ครบและผู้ใช้ทำงานได้จริง</b> เพื่อ <b>ความมั่นใจก่อน go-live</b></p>
+    <div class="sec-lbl">Sub-tasks</div>
+    <ul class="tasks"><li>ออกแบบ Conformance test suite ครอบคลุม MUST operations</li><li>ออกแบบ UAT scenario เชิงธุรกิจ + acceptance จากผู้ใช้จริง</li><li>กำหนดเกณฑ์ go-live ร่วมกับ Business Owner</li></ul>
+    <div class="sec-lbl">Acceptance Criteria</div>
+    <ul class="ac"><li class="sa">Conformance suite ครอบคลุม MUST operations (ดู Checklist ใน HIS Provider API Spec)</li><li class="ba">UAT scenario + acceptance จากแพทย์/พยาบาล/เภสัช</li><li class="ba">เกณฑ์ go-live ยืนยันจาก Business Owner</li></ul>
+    <div class="meta-row"><b>Deliverables:</b> Conformance test plan, UAT plan · <b>Dependencies:</b> SABA-8, SABA-9 · <b>DoD:</b> plan ผ่าน review</div>
+  </div>
+</div>
+
+<!-- ===== APPENDICES ===== -->
+<h2 class="app">📎 ภาคผนวก A — ตารางที่ "ต้องมีใน Smart IPD" และ "ไม่จำเป็นต้องมีใน HIS"</h2>
+<p style="font-size:13.5px;color:var(--muted)">ถูกสร้างตอนพัฒนา Smart IPD (อยู่ใน HAOS DB ปัจจุบัน) — เป็น domain ของ IPD จึงย้ายมาเป็นของ Smart IPD และตัดออกจาก HIS ได้</p>
+
+<div class="appbox">
+  <h3 class="app">A.1 Tier 1 — Master / Config (<code>TBM_IPD_*</code>, ~22 ตาราง) — coupling ต่ำ ย้ายก่อน</h3>
+  <p><b>FAIE Master + link tables:</b> <code>TBM_IPD_FOCUSES</code>, <code>TBM_IPD_FOCUS_CATEGORIES</code>, <code>TBM_IPD_FOCUS_SUBTYPES</code>, <code>TBM_IPD_ASSESSMENTS</code>, <code>TBM_IPD_ASSESSMENT_ABNORMAL_FINDINGS</code>, <code>TBM_IPD_INTERVENTIONS</code>, <code>TBM_IPD_EXPECTED_OUTCOMES</code>, <code>TBM_IPD_NURSE_NOTE_TEMPLATES</code> (+ <code>_ASSESSMENTS</code>, <code>_INTERVENTIONS</code>, <code>_EXPECTED_OUTCOMES</code>)</p>
+  <p><b>Intake/Output Master:</b> <code>TBM_IPD_INTAKE</code>, <code>TBM_IPD_OUTPUT</code></p>
+  <p><b>Audit logs:</b> <code>TBM_IPD_FOCUS_LOGS</code>, <code>TBM_IPD_FOCUS_CATEGORY_LOGS</code>, <code>TBM_IPD_FOCUS_SUBTYPE_LOGS</code>, <code>TBM_IPD_ASSESSMENT_LOGS</code>, <code>TBM_IPD_INTERVENTION_LOGS</code>, <code>TBM_IPD_EXPECTED_OUTCOME_LOGS</code>, <code>TBM_IPD_NURSE_NOTE_TEMPLATE_LOGS</code>, <code>TBM_IPD_INTAKE_LOGS</code>, <code>TBM_IPD_OUTPUT_LOGS</code></p>
+  <div class="callout">ความผูกพันกับ HIS: มีแค่ FK <code>UserCreated/Modified</code> → แก้เป็น reference value</div>
+</div>
+
+<div class="appbox">
+  <h3 class="app">A.2 Tier 2 — Transactional (<code>TB_IPD_*</code>, ~33 ตาราง) — ผูก AdmitId/PatientId/UserId</h3>
+  <p><b>Admission / Diagnosis:</b> <code>TB_IPD_ADMISSION_RECORDS</code> (+ extension ~11), <code>TB_IPD_DIAGS</code>, <code>TB_IPD_DOC_DIAGS</code>, <code>TB_IPD_PRE_DIAGS</code>, <code>TB_IPD_PROCEDURES</code>, <code>TB_IPD_HISTORY_PHYSICALS</code> (+ <code>_PROBLEM</code>), <code>TB_IPD_DISCHARGE_SUMMARIES</code>, <code>TB_IPD_CARDS</code></p>
+  <p><b>Progress notes / Orders:</b> <code>TB_IPD_DOCTOR_NOTES</code> (+ <code>_CANVAS</code>, <code>_PROBLEMS</code>, <code>_ACTIVITY_LOG</code>), <code>TB_IPD_DOCTOR_PROBLEMS</code>, <code>TB_IPD_NURSE_NOTES</code>, <code>TB_IPD_NURSE_FOCUS_ITEM</code>, <code>TB_IPD_ORDER_NOTES</code>, <code>TB_IPD_ORDER_NOTE_DETAILS</code>, <code>TB_IPD_ORDER_HOLD_LOGS</code>, <code>TB_IPD_ORDER_ACTIVITY_LOGS</code></p>
+  <p><b>eMAR:</b> <code>TB_IPD_ORDER_PLANS</code>, <code>TB_IPD_ORDER_PLAN_SCHEDULES</code>, <code>TB_IPD_ORDER_PLAN_ACTIVITIES</code></p>
+  <p><b>Nursing Care Plan:</b> <code>TB_IPD_PATIENT_NURSING_CARE_PLANS</code> (+ <code>_EXPECTED_OUTCOMES</code>), <code>TB_IPD_PATIENT_NURSING_PROGRESS_NOTES</code> (+ <code>_ASSESSMENTS</code>, <code>_INTERVENTIONS</code>, <code>_EXPECTED_OUTCOMES</code>)</p>
+  <p><b>Intake/Output · Pharmacy · Finance ref:</b> <code>TB_IPD_INTAKE_OUTPUT_RECORDS</code>, <code>TB_IPD_DISPENSING_REQUEST</code>, <code>TB_IPD_DISPENSING_VERIFICATION</code>, <code>TB_IPD_MED_RECONCILE</code> (+ <code>_ITEM</code>, <code>_SIGNATURE</code>, <code>_AUDIT_LOG</code>), <code>TB_REF_FINANCES_IPD_RIGHTS</code> ⚠️ ผูกการเงิน</p>
+</div>
+
+<div class="appbox">
+  <h3 class="app">A.3 Smart IPD-owned อื่น</h3>
+  <ul>
+    <li><code>Users</code>, <code>UserAccounts</code>, <code>RefreshTokens</code> (auth — อยู่ใน Smart IPD DB แล้ว)</li>
+    <li><code>TB_PATIENT_TAGS</code> (ปัจจุบันใน HAOS DB → ควรย้ายเข้า Smart IPD)</li>
+    <li>AI Chat cache, DICOM file index</li>
+  </ul>
+  <div class="callout"><code>TB_VITAL_SIGNS</code> เป็นแกน HIS (ไม่ใช่ <code>TB_IPD_*</code>) — โดยปริยายคงอยู่ที่ HIS เว้นแต่ตกลงให้ Smart IPD รับเป็นเจ้าของ (ดู SABA-9)</div>
+</div>
+
+<h2 class="app">📎 ภาคผนวก B — ข้อมูลที่ "Smart IPD จำเป็นต้องใช้จาก HIS"</h2>
+
+<div class="appbox">
+  <h3 class="app">B.1 อ่านจาก HIS (READ / Zone B)</h3>
+  <table>
+    <thead><tr><th>หมวด</th><th>ข้อมูล</th><th>ระดับ</th></tr></thead>
+    <tbody>
+      <tr><td>ผู้ป่วย</td><td>รายชื่อในวอร์ด, ข้อมูลตัวผู้ป่วย/บัตร (demographics+แพ้ยา+สิทธิ), ทีมแพทย์/พยาบาล, ประวัติ OPD/IPD</td><td>MUST (history=OPT)</td></tr>
+      <tr><td>Master กลาง</td><td>วอร์ด/เตียง/ห้อง, urgent types, ICD + diagnosis types/sides, discharge status/type, organs, order reasons</td><td>MUST</td></tr>
+      <tr><td>ยา</td><td>drug catalog + properties, timing/route/form/unit, interactions, templates</td><td>MUST (บางส่วน OPT)</td></tr>
+      <tr><td>แล็บ/เอกซเรย์</td><td>lab templates + groups, xray items + modalities</td><td>MUST</td></tr>
+      <tr><td>บุคลากร</td><td>ทำเนียบแพทย์/พยาบาล/เภสัชกร</td><td>MUST</td></tr>
+      <tr><td>ผลตรวจ</td><td>ผลแล็บ, ผลเอกซเรย์ + ลิงก์ PACS</td><td>MUST</td></tr>
+      <tr><td>ประชากร/การเงิน</td><td>สัญชาติ/ศาสนา/สถานภาพ/เชื้อชาติ/การศึกษา, countries, finance types</td><td>OPT</td></tr>
+      <tr><td>สัญญาณชีพ</td><td>(ถ้า HIS เป็นเจ้าของ)</td><td>OPT/MUST*</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="appbox">
+  <h3 class="app">B.2 เขียน/รับกับ HIS (WRITE-back &amp; EVENT / Zone C)</h3>
+  <table>
+    <thead><tr><th>ประเภท</th><th>ข้อมูล</th><th>ระดับ</th></tr></thead>
+    <tbody>
+      <tr><td>WRITE</td><td>ส่งคำสั่งยา/แล็บ/เอกซเรย์/ทั่วไป → HIS (Finance/Drug)</td><td>MUST</td></tr>
+      <tr><td>WRITE</td><td>แก้ไข/ยกเลิก/พัก/กลับมาใช้คำสั่ง</td><td>MUST</td></tr>
+      <tr><td>WRITE</td><td>นัดหมาย: สร้าง/แก้/ยกเลิก/เลื่อน</td><td>MUST* (ถ้าใช้ฟีเจอร์นัด)</td></tr>
+      <tr><td>WRITE</td><td>สัญญาณชีพ: บันทึก/แก้/ลบ</td><td>MUST* (ถ้า HIS เป็นเจ้าของ)</td></tr>
+      <tr><td>WRITE</td><td>การจ่ายยา/ค่าใช้จ่าย, วินิจฉัย(ICD)/สถานะจำหน่าย</td><td>OPT</td></tr>
+      <tr><td>WRITE</td><td>admit/ย้ายวอร์ด-เตียง/มอบหมายทีม (ถ้าสั่งจาก Smart IPD)</td><td>OPT</td></tr>
+      <tr><td>EVENT</td><td>ADT จาก HIS: Admit/Transfer/Discharge/Cancel</td><td>MUST</td></tr>
+      <tr><td>EVENT</td><td>สถานะคำสั่งกลับ (รับแล้ว/จ่ายแล้ว/เสร็จ)</td><td>MUST</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">รายละเอียด fields ต่อ operation: <code>SmartIPD-HIS-Provider-API-Spec.html</code></div>
+</div>
+
+<div class="panel">
+  <h2>🗺️ Roadmap (3 เฟส)</h2>
+  <ul style="margin:6px 0;padding-left:20px;font-size:14px">
+    <li><b>เฟส 1 — เข้าใจ (BA):</b> SABA-1 → SABA-2 → SABA-3 → SABA-4</li>
+    <li><b>เฟส 2 — ออกแบบ (SA):</b> SABA-5, SABA-7 → SABA-6 → SABA-8, SABA-9</li>
+    <li><b>เฟส 3 — เตรียมส่งมอบ:</b> SABA-10 → SABA-11 → SABA-12</li>
+  </ul>
+</div>
+
+<footer>Jira Cards — Smart IPD Decoupling · บทบาท SA กึ่ง BA · 1 Epic + 12 Stories</footer>
+</div>
+</body>
+</html>

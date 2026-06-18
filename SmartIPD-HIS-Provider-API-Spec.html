@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart IPD — HIS Provider API Spec (สิ่งที่ HIS ต้องทำให้)</title>
+<title>Smart IPD — HIS Provider API Spec (ฉบับละเอียด เข้าใจง่าย)</title>
 <style>
   :root{
     --bg:#f4f7fb; --card:#fff; --ink:#1f2733; --muted:#5b6675; --line:#dde3ea;
     --read:#0a6cf1; --readbg:#e6f0fc; --write:#137a3f; --writebg:#e7f6ec; --event:#7b3fe4; --eventbg:#f1eafd;
-    --must:#c4322b; --mustbg:#fdecea; --opt:#5b6675; --optbg:#eef1f4; --ipdown:#0a8f7f; --ipdownbg:#e0f6f2;
+    --must:#c4322b; --mustbg:#fdecea; --opt:#5b6675; --optbg:#eef1f4; --ipd:#0a8f7f; --ipdbg:#e0f6f2;
     --ch1:#7b3fe4; --ch1bg:#f1eafd; --ch2:#0a6cf1; --ch2bg:#e6f0fc; --ch3:#0a8f7f; --ch3bg:#e0f6f2;
     --warn:#9a6a00; --warnbg:#fff6df;
   }
@@ -16,17 +16,14 @@
   html{scroll-behavior:smooth;}
   body{margin:0; background:var(--bg); color:var(--ink);
     font-family:"Segoe UI","Sarabun","Noto Sans Thai",Tahoma,sans-serif; line-height:1.65; font-size:15px;}
-  .wrap{max-width:1080px; margin:0 auto; padding:30px 18px 80px;}
+  .wrap{max-width:1060px; margin:0 auto; padding:30px 18px 80px;}
 
   header.doc{background:linear-gradient(135deg,#0a8f7f,#0a3069); color:#fff;
-    border-radius:16px; padding:30px 34px; margin-bottom:24px; box-shadow:0 6px 20px rgba(10,143,127,.2);}
+    border-radius:16px; padding:30px 34px; margin-bottom:22px; box-shadow:0 6px 20px rgba(10,143,127,.2);}
   header.doc .kicker{font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; opacity:.9;}
   header.doc h1{margin:6px 0 8px; font-size:26px;}
   header.doc p{margin:5px 0; opacity:.94; font-size:14px;}
   header.doc .meta{margin-top:12px; font-size:12.5px; opacity:.85; border-top:1px solid rgba(255,255,255,.25); padding-top:10px;}
-  .stats{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px;}
-  .stat{background:rgba(255,255,255,.16); border-radius:10px; padding:8px 16px;}
-  .stat .n{font-size:21px; font-weight:800;} .stat .l{font-size:11.5px; opacity:.9;}
 
   nav.toc{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 24px; margin-bottom:24px;}
   nav.toc h2{margin:0 0 8px; font-size:15px; color:var(--muted);}
@@ -35,44 +32,54 @@
 
   section{background:var(--card); border:1px solid var(--line); border-radius:14px;
     padding:24px 28px; margin-bottom:22px; box-shadow:0 1px 4px rgba(0,0,0,.04);}
-  h2.sec{margin:0 0 14px; font-size:21px; padding-bottom:11px; border-bottom:2px solid var(--line); display:flex; gap:9px; align-items:center; flex-wrap:wrap;}
+  h2.sec{margin:0 0 6px; font-size:21px; padding-bottom:11px; border-bottom:2px solid var(--line); display:flex; gap:9px; align-items:center; flex-wrap:wrap;}
   h2.sec .cnt{font-size:12px; color:var(--muted); font-weight:600; margin-left:auto;}
+  .secintro{font-size:14px; color:var(--muted); margin:10px 0 4px;}
   h3{font-size:17px; margin:20px 0 8px;}
-  h4{font-size:14px; margin:16px 0 6px; color:var(--read); font-weight:700;}
-  p{margin:9px 0;} ul{margin:8px 0; padding-left:22px;} li{margin:5px 0;}
+  p{margin:8px 0;} ul{margin:8px 0; padding-left:22px;} li{margin:5px 0;}
   strong{color:#000;}
   code{font-family:"Cascadia Code",Consolas,monospace; font-size:12.5px; background:#f1f4f8; padding:1.5px 6px; border-radius:5px;}
 
-  table{border-collapse:collapse; width:100%; margin:10px 0; font-size:13px;}
+  table{border-collapse:collapse; width:100%; margin:8px 0; font-size:13px;}
   th,td{border:1px solid var(--line); padding:7px 10px; text-align:left; vertical-align:top;}
   th{background:#eef3f9; font-weight:700;}
   tbody tr:nth-child(even){background:#fafcfe;}
-  td.op-id{font-family:"Cascadia Code",Consolas,monospace; font-size:11.5px; color:var(--muted); white-space:nowrap;}
+  td.req{color:var(--must); font-weight:700; white-space:nowrap;} td.opt2{color:var(--muted); white-space:nowrap;}
+  td.fld{font-family:"Cascadia Code",Consolas,monospace; font-size:12px; white-space:nowrap; color:#1d3b53;}
+  td.typ{color:var(--muted); white-space:nowrap; font-size:12px;}
 
-  .pill{display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:700; white-space:nowrap;}
+  .pill{display:inline-block; padding:2px 10px; border-radius:20px; font-size:11.5px; font-weight:700; white-space:nowrap;}
   .read{background:var(--readbg); color:var(--read);} .write{background:var(--writebg); color:var(--write);} .event{background:var(--eventbg); color:var(--event);}
   .must{background:var(--mustbg); color:var(--must); font-weight:800;} .opt{background:var(--optbg); color:var(--opt);}
-  .ipdown{background:var(--ipdownbg); color:var(--ipdown); font-weight:700;}
+  .ipdp{background:var(--ipdbg); color:var(--ipd); font-weight:700;}
   .ch1{background:var(--ch1bg); color:var(--ch1);} .ch2{background:var(--ch2bg); color:var(--ch2);} .ch3{background:var(--ch3bg); color:var(--ch3);}
 
-  .op{border:1px solid var(--line); border-radius:12px; margin:14px 0; overflow:hidden;}
+  .op{border:1px solid var(--line); border-radius:12px; margin:16px 0; overflow:hidden;}
   .op > .ophead{padding:11px 16px; background:#f7f9fc; border-bottom:1px solid var(--line); display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
-  .op .opname{font-weight:800; font-size:15px;}
+  .op .opname{font-weight:800; font-size:15.5px;}
   .op .opid{font-family:"Cascadia Code",Consolas,monospace; font-size:11.5px; color:var(--muted);}
+  .op .ep{order:10; flex-basis:100%; margin-top:5px; font-family:"Cascadia Code",Consolas,monospace; font-size:12.5px; color:#33415a; display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+  .op .ep i{font-style:normal; color:var(--muted); font-family:inherit;}
+  .m{display:inline-block; min-width:46px; text-align:center; padding:1.5px 8px; border-radius:5px; font-size:10.5px; font-weight:800; letter-spacing:.02em;}
+  .m-get{background:#e7f6ec; color:#137a3f;} .m-post{background:#e6f0fc; color:#0a6cf1;}
+  .m-patch{background:#fff6df; color:#9a6a00;} .m-delete{background:#fdecea; color:#c4322b;}
   .op .opbadges{margin-left:auto; display:flex; gap:5px; flex-wrap:wrap;}
-  .op .opbody{padding:13px 16px;}
-  .op .purpose{font-size:13.5px; color:#3a4759; margin:0 0 8px;}
-  .io{font-size:11px; font-weight:800; letter-spacing:.03em; color:var(--muted); margin:11px 0 3px; text-transform:uppercase;}
+  .op .opbody{padding:14px 16px;}
+  .uses{background:#eef6ff; border-left:4px solid var(--read); border-radius:8px; padding:9px 13px; font-size:14px; margin:0 0 12px;}
+  .uses b{color:var(--read);}
+  .io{font-size:11.5px; font-weight:800; letter-spacing:.03em; color:var(--muted); margin:13px 0 4px; text-transform:uppercase; display:flex; gap:7px; align-items:center;}
   .io.in{color:var(--read);} .io.out{color:var(--write);}
+  .sample{margin-top:8px; background:#10293c; color:#bfe3ff; border-radius:8px; padding:9px 13px; font-size:12.5px; font-family:Consolas,"Cascadia Code",monospace; overflow-x:auto; white-space:nowrap;}
+  .sample .lbl{color:#7fb0d8; display:block; margin-bottom:3px; font-size:11px;}
 
   .callout{border-radius:12px; padding:14px 18px; margin:16px 0; border:1px solid;}
   .callout.key{background:var(--readbg); border-color:#9cc3f2;}
   .callout.warn{background:var(--warnbg); border-color:#e3c373;}
-  .callout.ipd{background:var(--ipdownbg); border-color:#8fd4c8;}
+  .callout.ipd{background:var(--ipdbg); border-color:#8fd4c8;}
   .callout .lbl{font-weight:800; display:block; margin-bottom:4px;}
   .callout p:first-child{margin-top:0;} .callout p:last-child{margin-bottom:0;}
 
-  .legend{display:flex; gap:16px; flex-wrap:wrap; margin:12px 0; font-size:13px;}
+  .legend{display:flex; gap:14px; flex-wrap:wrap; margin:12px 0; font-size:13px;}
   .legend span{display:flex; align-items:center; gap:6px;}
   .check{list-style:none; margin:8px 0; padding:0;}
   .check li{position:relative; padding:8px 12px 8px 38px; margin:6px 0; border:1px solid var(--line); border-radius:10px; background:#fcfdfe; font-size:13.5px;}
@@ -86,431 +93,547 @@
 <div class="wrap">
 
 <header class="doc">
-  <div class="kicker">HIS Provider API Specification · ฉบับเทคนิคสำหรับทีม HIS</div>
+  <div class="kicker">HIS Provider API Specification · ฉบับละเอียด เข้าใจง่าย</div>
   <h1>API / ข้อมูลที่ HIS ต้องทำให้ Smart IPD</h1>
-  <p>รายการ "ความสามารถ" ที่ HIS ต้องเปิดให้ Smart IPD ใช้ — ครบทุกรายการ พร้อม ทิศทาง · ระดับ (จำเป็น/เสริม) · ช่องทาง · ฟิลด์ข้อมูล</p>
-  <div class="stats">
-    <div class="stat"><div class="n">~40</div><div class="l">operation หลัก</div></div>
-    <div class="stat"><div class="n">50+</div><div class="l">master/lookup</div></div>
-    <div class="stat"><div class="n">139</div><div class="l">write ops ที่ตรวจแล้ว</div></div>
-  </div>
-  <div class="meta">
-    v1.1 · 11 มิถุนายน 2026 · คู่กับ: SmartIPD-HIS-Partner-Integration-Guide (ภาพรวม), SmartIPD-HIS-Integration-Spec (สถาปัตยกรรม)
-    &nbsp;·&nbsp; <strong>หมายเหตุ:</strong> นี่คือสิ่งที่ HIS ต้องจัด — ไม่ใช่ API ภายในของ Smart IPD
-  </div>
+  <p>ทุก operation มี: 👉 ใช้ทำอะไร (ภาษาคน) · ตาราง field ครบ (ชนิด/จำเป็น/คำอธิบาย) · ตัวอย่างข้อมูลจริง</p>
+  <div class="meta">v2.0 · 11 มิถุนายน 2026 · คู่กับ: Partner Integration Guide (ภาพรวม), Onboarding Deck (นำเสนอ) &nbsp;·&nbsp; <strong>หมายเหตุ:</strong> นี่คือสิ่งที่ HIS ต้องจัด ไม่ใช่ API ภายในของ Smart IPD</div>
 </header>
 
 <nav class="toc">
   <h2>หัวข้อ</h2>
   <ol>
-    <li><a href="#s0">0. วิธีอ่าน &amp; ข้อตกลงร่วม</a></li>
-    <li><a href="#sid">1. รหัสอ้างอิงที่ต้องแนบ</a></li>
-    <li><a href="#sa">2. ผู้ป่วย &amp; การรับเข้า (READ/WRITE/EVENT)</a></li>
-    <li><a href="#sap">3. นัดหมาย (Appointment) — READ/WRITE</a></li>
-    <li><a href="#sb">4. ข้อมูลตั้งต้น (Master Data) — ครบทุกรายการ</a></li>
+    <li><a href="#s0">0. วิธีอ่านสเปกนี้ (อ่านก่อน)</a></li>
+    <li><a href="#sid">1. รหัสอ้างอิงที่ต้องแนบทุกครั้ง</a></li>
+    <li><a href="#sa">2. ผู้ป่วย &amp; การรับเข้า</a></li>
+    <li><a href="#sap">3. นัดหมาย (Appointment)</a></li>
+    <li><a href="#sb">4. ข้อมูลตั้งต้น (Master Data)</a></li>
     <li><a href="#sb2">5. ยา (Drug Catalog)</a></li>
     <li><a href="#sb3">6. แล็บ / เอกซเรย์ (Catalog)</a></li>
     <li><a href="#sb4">7. บุคลากร (Directory)</a></li>
-    <li><a href="#sc">8. ผลตรวจ (READ)</a></li>
-    <li><a href="#svit">9. สัญญาณชีพ (Vital Signs) — READ/WRITE</a></li>
-    <li><a href="#sd">10. ส่งคำสั่งกลับ &amp; สถานะ (WRITE/EVENT)</a></li>
+    <li><a href="#sc">8. ผลตรวจ</a></li>
+    <li><a href="#svit">9. สัญญาณชีพ (Vital Signs)</a></li>
+    <li><a href="#sd">10. ส่งคำสั่งกลับ &amp; สถานะ</a></li>
     <li><a href="#se">11. รายการเสริม (OPTIONAL)</a></li>
-    <li><a href="#sx">12. ส่วนที่ Smart IPD เป็นเจ้าของเอง (HIS ไม่ต้องจัด)</a></li>
-    <li><a href="#snf">13. Non-functional &amp; Conformance</a></li>
+    <li><a href="#sx">12. ส่วนที่ Smart IPD ทำเอง (HIS ไม่ต้องจัด)</a></li>
+    <li><a href="#snf">13. ความปลอดภัย &amp; Checklist</a></li>
+    <li><a href="#sep">📎 ภาคผนวก — สรุป Endpoint ทั้งหมด (Path API)</a></li>
   </ol>
 </nav>
 
 <!-- 0 -->
 <section id="s0">
   <h2 class="sec">📖 0. วิธีอ่านสเปกนี้</h2>
-  <p>แต่ละรายการคือ "ความสามารถเชิงตรรกะ" ที่ HIS ต้องจัดให้ — <strong>ไม่บังคับรูปแบบเทคนิค</strong> ชื่อ operation เช่น <code>His.GetDrugCatalog</code> เป็นเพียงตัวอ้างอิง HIS เลือกได้ว่าจะส่งมอบผ่านช่องทางไหน</p>
+  <p>แต่ละกล่องคือ "ความสามารถหนึ่งอย่าง" ที่ HIS ต้องจัดให้ — อ่านจากบนลงล่างได้เลย ไม่ต้องมีพื้นฐานโปรแกรมมาก</p>
+
   <div class="legend">
-    <span><span class="pill read">READ</span> Smart IPD อ่านจาก HIS</span>
-    <span><span class="pill write">WRITE</span> Smart IPD ส่งกลับเข้า HIS</span>
+    <span><span class="pill read">READ</span> Smart IPD ขออ่านจาก HIS</span>
+    <span><span class="pill write">WRITE</span> Smart IPD ส่งกลับให้ HIS</span>
     <span><span class="pill event">EVENT</span> HIS ส่งเข้ามาเมื่อมีเหตุการณ์</span>
     <span><span class="pill must">MUST</span> จำเป็น</span>
-    <span><span class="pill opt">OPT</span> เสริม</span>
+    <span><span class="pill opt">OPT</span> เสริม (ทีหลังได้)</span>
   </div>
-  <ul>
-    <li><span class="pill ch1">ช่องทาง 1</span> เปิดฐานข้อมูล (DB) ให้อ่าน read-only · <span class="pill ch2">ช่องทาง 2</span> เปิด API ของ HIS · <span class="pill ch3">ช่องทาง 3</span> HIS push เข้ามา</li>
-    <li><strong>READ</strong> ใช้ช่องทาง 1/2 · <strong>WRITE</strong> ต้องผ่านช่องทาง 2 (ห้ามเขียน DB ตรง) · <strong>EVENT</strong> ใช้ช่องทาง 3</li>
-    <li>Master data ปริมาณมากแต่เปลี่ยนช้า → แนะนำ sync เข้ามา cache แทนการเรียกซ้ำ</li>
-  </ul>
-  <div class="callout key"><span class="lbl">ขอบเขตความครบถ้วน (v1.1)</span><p>สเปกนี้ครอบคลุม <strong>ทั้งการอ่าน (READ) และการเขียน (INSERT/UPDATE/DELETE)</strong> ที่ "ข้ามไป HIS" จริง — ตรวจทานจาก 362 endpoint ของ Smart IPD (รวม 139 operation ที่เป็น write) เทียบกับ adapter จริง. operation ที่เขียน "ข้อมูลคลินิก IPD" (บันทึก/คำสั่ง/แผน) เป็นการเขียน <strong>local ของ Smart IPD</strong> ไม่นับเป็นสิ่งที่ HIS ต้องจัด (ดูข้อ 12). ส่วนที่ใช้ POST แต่เป็น "การค้นหา" ถือเป็น READ</p></div>
+  <p><b>ช่องทางที่ HIS เลือกจัดได้:</b> <span class="pill ch1">1 = เปิด DB ให้อ่าน</span> &nbsp; <span class="pill ch2">2 = เปิด API ของ HIS</span> &nbsp; <span class="pill ch3">3 = HIS push เข้ามา</span> &nbsp;— เลือกแบบไหนก็ได้/ผสมได้</p>
+
+  <div class="callout key"><span class="lbl">เรื่อง Path / Endpoint (เพิ่มใน v2.1)</span><p>แต่ละกล่องมี <strong>ตัวอย่าง path ของ API</strong> เช่น <code>GET /his/patients/admitted</code> — เป็นเพียง<strong>ข้อเสนอ</strong> HIS จะตั้งชื่อ endpoint จริงเป็นอะไรก็ได้ ขอแค่มีความสามารถนั้น · Base URL สมมติ เช่น <code>https://his.hospital.org/api/v1</code> · <span class="pill event">EVENT</span> = HIS เป็นฝ่ายเรียกเข้า "webhook ของ Smart IPD"</p></div>
+
+  <h3>ตัวอย่างวิธีอ่าน 1 กล่อง</h3>
+  <div class="op">
+    <div class="ophead"><span class="opname">ชื่อความสามารถ (ภาษาคน)</span><span class="opid">His.ExampleOperation</span>
+      <span class="ep"><span class="m m-get">GET</span> /his/example/{an}</span>
+      <span class="opbadges"><span class="pill read">READ</span><span class="pill must">MUST</span><span class="pill ch2">2</span></span></div>
+    <div class="opbody">
+      <div class="uses">👉 <b>ใช้ทำอะไร:</b> อธิบายเป็นภาษาคนว่า Smart IPD เอาข้อมูลนี้ไปทำอะไร</div>
+      <div class="io in">📥 INPUT — Smart IPD ส่งให้ HIS (เพื่อระบุว่าจะขอข้อมูลอะไร)</div>
+      <table><thead><tr><th>ฟิลด์</th><th>ชนิด</th><th>จำเป็น</th><th>คำอธิบาย</th></tr></thead>
+        <tbody><tr><td class="fld">an</td><td class="typ">string</td><td class="req">ใช่</td><td>เลขการรับเข้านอน</td></tr></tbody></table>
+      <div class="io out">📤 OUTPUT — HIS ส่งกลับให้ Smart IPD</div>
+      <table><thead><tr><th>ฟิลด์</th><th>ชนิด</th><th>คำอธิบาย</th></tr></thead>
+        <tbody><tr><td class="fld">fullName</td><td class="typ">string</td><td>ชื่อ-สกุลผู้ป่วย</td></tr></tbody></table>
+      <div class="sample"><span class="lbl">ตัวอย่างข้อมูล 1 แถว</span>an=AN680112 → { fullName: "นายสมชาย ใจดี" }</div>
+    </div>
+  </div>
+  <div class="callout key"><p><strong>กฎง่าย ๆ:</strong> READ ใช้ช่องทาง 1 หรือ 2 · WRITE ต้องผ่านช่องทาง 2 (ห้ามเขียน DB ตรง) · EVENT ใช้ช่องทาง 3 · Master data ที่เปลี่ยนช้า แนะนำ sync มาเก็บ cache</p></div>
 </section>
 
-<!-- 1 identity -->
+<!-- 1 -->
 <section id="sid">
   <h2 class="sec">🔑 1. รหัสอ้างอิงที่ต้องแนบมาทุกครั้ง</h2>
-  <p>ข้อมูลทุก operation ต้องมีรหัสอ้างอิงเหล่านี้ติดมาด้วย (เป็น "ค่าที่ HIS ใช้จริง" Smart IPD เก็บไว้อ้างอิงโดยไม่ดัดแปลง)</p>
+  <p class="secintro">Smart IPD เก็บข้อมูล IPD ของตัวเอง แต่ต้อง "อ้างถึง" สิ่งของ HIS — ขอให้ส่งรหัสเหล่านี้เป็น "ค่าที่ HIS ใช้จริง" มาด้วย (Smart IPD จะเก็บไว้ตรง ๆ ไม่ดัดแปลง)</p>
   <table>
-    <thead><tr><th>ฟิลด์</th><th>ความหมาย</th></tr></thead>
+    <thead><tr><th>ฟิลด์</th><th>คือ</th><th>ตัวอย่าง</th></tr></thead>
     <tbody>
-      <tr><td><code>hn</code></td><td>เลขประจำตัวผู้ป่วย (Hospital Number)</td></tr>
-      <tr><td><code>an</code></td><td>เลขการรับเข้านอน (Admission Number)</td></tr>
-      <tr><td><code>userId</code></td><td>รหัสบุคลากร (แพทย์/พยาบาล/เภสัชกร)</td></tr>
-      <tr><td><code>drugCode</code> / <code>labCode</code> / <code>xrayCode</code> / <code>icdCode</code></td><td>รหัสรายการในบัญชีกลาง</td></tr>
-      <tr><td><code>wardCode</code> / <code>bedCode</code></td><td>รหัสวอร์ด / เตียง</td></tr>
-      <tr><td><code>orderId</code></td><td>รหัสคำสั่งที่ HIS สร้างหลังรับคำสั่ง</td></tr>
+      <tr><td class="fld">hn</td><td>เลขประจำตัวผู้ป่วย (Hospital Number) — 1 คน 1 เลข ตลอดชีวิต</td><td>6712345</td></tr>
+      <tr><td class="fld">an</td><td>เลขการรับเข้านอน (Admission Number) — 1 ครั้งที่นอน</td><td>AN680112</td></tr>
+      <tr><td class="fld">userId</td><td>รหัสบุคลากร (แพทย์/พยาบาล/เภสัชกร)</td><td>D00123</td></tr>
+      <tr><td class="fld">drugCode</td><td>รหัสยาในบัญชี</td><td>DRG0045</td></tr>
+      <tr><td class="fld">labCode / xrayCode</td><td>รหัสรายการแล็บ / เอกซเรย์</td><td>LAB0102 / XR0033</td></tr>
+      <tr><td class="fld">wardCode / bedCode</td><td>รหัสวอร์ด / เตียง</td><td>WD03 / BED12</td></tr>
+      <tr><td class="fld">orderId</td><td>รหัสคำสั่งที่ HIS สร้างหลังรับคำสั่ง (ส่งกลับมาให้ Smart IPD)</td><td>ORD78901</td></tr>
     </tbody>
   </table>
 </section>
 
 <!-- 2 PATIENT -->
 <section id="sa">
-  <h2 class="sec">👤 2. ผู้ป่วย &amp; การรับเข้า <span class="cnt">READ 14 · WRITE 8 · EVENT 1</span></h2>
-  <p>Smart IPD ต้องดึงข้อมูลผู้ป่วยหลายมุม และในบางรพ. อาจสั่ง admit/ย้าย/มอบหมายทีมจาก Smart IPD (ส่งกลับ HIS)</p>
-
-  <h3>2.1 รายการ READ (HIS ต้องเปิดให้อ่าน)</h3>
-  <table>
-    <thead><tr><th>operation</th><th>ดึงอะไร</th><th>ระดับ</th><th>ช่องทาง</th></tr></thead>
-    <tbody>
-      <tr><td class="op-id">His.GetAdmittedPatients</td><td>รายชื่อผู้ป่วยที่นอนอยู่ในวอร์ด (worklist)</td><td><span class="pill must">MUST</span></td><td><span class="pill ch3">3</span>/<span class="pill ch1">1</span>/<span class="pill ch2">2</span></td></tr>
-      <tr><td class="op-id">His.GetPatientInfo</td><td>ข้อมูลตัวผู้ป่วยพื้นฐาน + แพ้ยา</td><td><span class="pill must">MUST</span></td><td><span class="pill ch2">2</span>/<span class="pill ch1">1</span></td></tr>
-      <tr><td class="op-id">His.GetPatientAdmissionCard</td><td>บัตรผู้ป่วยฉบับเต็ม (demographics + สิทธิ + แพ้ยา + วินิจฉัย + การรับเข้า)</td><td><span class="pill must">MUST</span></td><td><span class="pill ch2">2</span>/<span class="pill ch1">1</span></td></tr>
-      <tr><td class="op-id">His.GetDoctorPatients</td><td>รายชื่อผู้ป่วยของแพทย์ (+ แบบแบ่งหน้า)</td><td><span class="pill must">MUST</span></td><td><span class="pill ch1">1</span>/<span class="pill ch2">2</span></td></tr>
-      <tr><td class="op-id">His.GetPatientDoctors</td><td>ทีมแพทย์ของผู้ป่วย (เจ้าของไข้/ผู้ช่วย)</td><td><span class="pill must">MUST</span></td><td><span class="pill ch1">1</span>/<span class="pill ch2">2</span></td></tr>
-      <tr><td class="op-id">His.GetPrimaryNurseHistory</td><td>ประวัติพยาบาลเจ้าของไข้</td><td><span class="pill opt">OPT</span></td><td><span class="pill ch1">1</span>/<span class="pill ch2">2</span></td></tr>
-      <tr><td class="op-id">His.GetWardTransferHistory</td><td>ประวัติการย้ายวอร์ดของผู้ป่วย</td><td><span class="pill opt">OPT</span></td><td><span class="pill ch1">1</span>/<span class="pill ch2">2</span></td></tr>
-      <tr><td class="op-id">His.GetOpdHistory / Detail</td><td>ประวัติผู้ป่วยนอก (OPD) + รายละเอียด</td><td><span class="pill opt">OPT</span></td><td><span class="pill ch1">1</span>/<span class="pill ch2">2</span></td></tr>
-      <tr><td class="op-id">His.GetIpdHistory / Detail</td><td>ประวัติผู้ป่วยใน (IPD) เดิม + รายละเอียด</td><td><span class="pill opt">OPT</span></td><td><span class="pill ch1">1</span>/<span class="pill ch2">2</span></td></tr>
-      <tr><td class="op-id">His.GetAppointments</td><td>นัดหมายของผู้ป่วย</td><td><span class="pill opt">OPT</span></td><td><span class="pill ch1">1</span>/<span class="pill ch2">2</span></td></tr>
-      <tr><td class="op-id">His.GetWardsWithOpdPatients / WardPatientsWithOpdHistory</td><td>ผู้ป่วยในวอร์ดที่มีประวัติ OPD (สำหรับ flow รับเข้า)</td><td><span class="pill opt">OPT</span></td><td><span class="pill ch1">1</span>/<span class="pill ch2">2</span></td></tr>
-    </tbody>
-  </table>
+  <h2 class="sec">👤 2. ผู้ป่วย &amp; การรับเข้า <span class="cnt">READ + EVENT</span></h2>
+  <p class="secintro">หัวใจของระบบ — Smart IPD ต้องรู้ว่า "ตอนนี้มีใครนอนอยู่บ้าง" และ "ผู้ป่วยแต่ละคนเป็นใคร"</p>
 
   <div class="op">
-    <div class="ophead">
-      <span class="opname">บัตรผู้ป่วยฉบับเต็ม</span><span class="opid">His.GetPatientAdmissionCard</span>
-      <span class="opbadges"><span class="pill read">READ</span><span class="pill must">MUST</span></span>
-    </div>
+    <div class="ophead"><span class="opname">รายชื่อผู้ป่วยที่นอนอยู่ในวอร์ด</span><span class="opid">His.GetAdmittedPatients</span>
+      <span class="ep"><span class="m m-get">GET</span> /his/patients/admitted?ward={wardCode}&amp;doctor={doctorId}</span>
+      <span class="opbadges"><span class="pill read">READ</span><span class="pill must">MUST</span><span class="pill ch3">3</span><span class="pill ch1">1</span><span class="pill ch2">2</span></span></div>
     <div class="opbody">
-      <p class="purpose">ฟิลด์รวมที่ Smart IPD ต้องใช้ — แสดงหัวบัตร, ตรวจแพ้ยา, อ้างอิงการรับเข้า</p>
-      <div class="io in">Input</div>
-      <table><tbody><tr><td><code>an</code> หรือ <code>hn</code></td><td>ระบุผู้ป่วย</td></tr></tbody></table>
-      <div class="io out">Output (ฟิลด์ครบ)</div>
-      <table><thead><tr><th>กลุ่ม</th><th>ฟิลด์</th></tr></thead><tbody>
-        <tr><td>ตัวตน</td><td><code>hn</code>, <code>fullName</code>, <code>sex</code>, <code>birthDate</code>/<code>age</code>, <code>nationalId</code></td></tr>
-        <tr><td>ติดต่อ</td><td><code>address</code>, <code>phone</code></td></tr>
-        <tr><td>คลินิก</td><td><code>bloodGroup</code>, <code>allergies[]</code> {name, reaction}, <code>adverseReactions[]</code>, <code>chronicConditions[]</code></td></tr>
-        <tr><td>สิทธิ</td><td><code>rightCode</code>, <code>rightName</code></td></tr>
-        <tr><td>ประชากร</td><td><code>nationality</code>, <code>religion</code>, <code>maritalStatus</code> (ถ้ามี)</td></tr>
-        <tr><td>การรับเข้า</td><td><code>an</code>, <code>admitDateTime</code>, <code>wardCode</code>/<code>wardName</code>, <code>bedCode</code>, <code>admissionType</code>, <code>attendingDoctorId</code>/<code>Name</code></td></tr>
-        <tr><td>วินิจฉัย</td><td><code>currentDiagnosis[]</code> {icdCode, description}</td></tr>
+      <div class="uses">👉 <b>ใช้ทำอะไร:</b> เอามาแสดงเป็น "กระดานผู้ป่วย" หน้าแรกที่พยาบาล/แพทย์เปิดดูทุกเช้า ว่าวันนี้ในวอร์ดมีใครบ้าง</div>
+      <div class="io in">📥 INPUT</div>
+      <table><thead><tr><th>ฟิลด์</th><th>ชนิด</th><th>จำเป็น</th><th>คำอธิบาย</th></tr></thead><tbody>
+        <tr><td class="fld">wardCode</td><td class="typ">string</td><td class="opt2">ไม่</td><td>กรองเฉพาะวอร์ด (เว้นว่าง = ทุกวอร์ด)</td></tr>
+        <tr><td class="fld">doctorId</td><td class="typ">string</td><td class="opt2">ไม่</td><td>กรองเฉพาะผู้ป่วยของแพทย์คนนี้</td></tr>
       </tbody></table>
+      <div class="io out">📤 OUTPUT (1 แถว = ผู้ป่วย 1 ราย)</div>
+      <table><thead><tr><th>ฟิลด์</th><th>ชนิด</th><th>คำอธิบาย</th></tr></thead><tbody>
+        <tr><td class="fld">hn</td><td class="typ">string</td><td>เลขประจำตัวผู้ป่วย</td></tr>
+        <tr><td class="fld">an</td><td class="typ">string</td><td>เลขการรับเข้านอนครั้งนี้</td></tr>
+        <tr><td class="fld">fullName</td><td class="typ">string</td><td>ชื่อ-สกุล</td></tr>
+        <tr><td class="fld">sex</td><td class="typ">string</td><td>เพศ (ช/ญ)</td></tr>
+        <tr><td class="fld">birthDate / age</td><td class="typ">date / int</td><td>วันเกิด หรืออายุ</td></tr>
+        <tr><td class="fld">wardCode</td><td class="typ">string</td><td>วอร์ดที่นอน</td></tr>
+        <tr><td class="fld">bedCode</td><td class="typ">string</td><td>เตียง</td></tr>
+        <tr><td class="fld">attendingDoctorId</td><td class="typ">string</td><td>รหัสแพทย์เจ้าของไข้</td></tr>
+        <tr><td class="fld">attendingDoctorName</td><td class="typ">string</td><td>ชื่อแพทย์เจ้าของไข้</td></tr>
+        <tr><td class="fld">admitDateTime</td><td class="typ">datetime</td><td>วันเวลาที่รับเข้า</td></tr>
+        <tr><td class="fld">status</td><td class="typ">string</td><td>สถานะ เช่น admitted / รอย้าย / รอจำหน่าย</td></tr>
+      </tbody></table>
+      <div class="sample"><span class="lbl">ตัวอย่างข้อมูล 1 แถว</span>6712345 | AN680112 | นายสมชาย ใจดี | ช | 58 | WD03 (อายุรกรรม) | BED12 | D00123 (นพ.สมหญิง) | 2025-01-12 09:20 | admitted</div>
     </div>
   </div>
 
   <div class="op">
-    <div class="ophead">
-      <span class="opname">เหตุการณ์ผู้ป่วย (ADT)</span><span class="opid">His.PatientEvents — Admit / Transfer / Discharge / Cancel</span>
-      <span class="opbadges"><span class="pill event">EVENT</span><span class="pill must">MUST</span><span class="pill ch3">3</span></span>
-    </div>
+    <div class="ophead"><span class="opname">ข้อมูลผู้ป่วย / บัตรผู้ป่วยฉบับเต็ม</span><span class="opid">His.GetPatientInfo · His.GetPatientAdmissionCard</span>
+      <span class="ep"><span class="m m-get">GET</span> /his/patients/{an} &nbsp;·&nbsp; /his/patients/{an}/admission-card</span>
+      <span class="opbadges"><span class="pill read">READ</span><span class="pill must">MUST</span><span class="pill ch2">2</span><span class="pill ch1">1</span></span></div>
     <div class="opbody">
-      <p class="purpose">เมื่อมีรับเข้า/ย้ายวอร์ด-เตียง/จำหน่าย/ยกเลิก HIS push เข้ามาทันที (หากทำไม่ได้ → Smart IPD poll <code>GetAdmittedPatients</code>)</p>
-      <div class="io out">Payload</div>
-      <table><tbody>
-        <tr><td><code>eventType</code></td><td>ADMIT / TRANSFER / DISCHARGE / CANCEL</td></tr>
-        <tr><td><code>an</code>, <code>hn</code></td><td>ผู้ป่วย</td></tr>
-        <tr><td><code>wardCode</code>, <code>bedCode</code></td><td>ปลายทาง (ADMIT/TRANSFER)</td></tr>
-        <tr><td><code>eventDateTime</code></td><td>เวลาที่เกิดเหตุการณ์</td></tr>
+      <div class="uses">👉 <b>ใช้ทำอะไร:</b> แสดง "หัวบัตร" ผู้ป่วย และใช้ <b>เตือนแพ้ยา</b> ตอนแพทย์สั่งยา (ความปลอดภัย)</div>
+      <div class="io in">📥 INPUT</div>
+      <table><tbody><tr><td class="fld">an หรือ hn</td><td class="typ">string</td><td class="req">ใช่</td><td>ระบุผู้ป่วย</td></tr></tbody></table>
+      <div class="io out">📤 OUTPUT</div>
+      <table><thead><tr><th>ฟิลด์</th><th>ชนิด</th><th>คำอธิบาย</th></tr></thead><tbody>
+        <tr><td class="fld">hn, fullName, sex, birthDate</td><td class="typ">—</td><td>ข้อมูลตัวตน</td></tr>
+        <tr><td class="fld">nationalId</td><td class="typ">string</td><td>เลขบัตรประชาชน (ถ้ามี)</td></tr>
+        <tr><td class="fld">rightCode, rightName</td><td class="typ">string</td><td>สิทธิการรักษา (เช่น บัตรทอง/ประกันสังคม)</td></tr>
+        <tr><td class="fld">allergies[]</td><td class="typ">list</td><td><b>รายการแพ้ยา</b> — แต่ละรายการมี {ชื่อ, อาการ}</td></tr>
+        <tr><td class="fld">bloodGroup</td><td class="typ">string</td><td>หมู่เลือด</td></tr>
+        <tr><td class="fld">currentDiagnosis[]</td><td class="typ">list</td><td>การวินิจฉัยปัจจุบัน {icdCode, ชื่อโรค}</td></tr>
+        <tr><td class="fld">admitDateTime, wardCode, bedCode, attendingDoctorId</td><td class="typ">—</td><td>ข้อมูลการรับเข้าครั้งนี้</td></tr>
       </tbody></table>
+      <div class="sample"><span class="lbl">ตัวอย่าง allergies[]</span>[ { name: "Penicillin", reaction: "ผื่นลมพิษ" }, { name: "Aspirin", reaction: "หอบ" } ]</div>
     </div>
   </div>
 
-  <h3>2.2 รายการ WRITE-back (HIS ต้องรับ — ถ้าให้ Smart IPD เป็นคนสั่ง)</h3>
-  <p style="font-size:13px;color:var(--muted)">หากโรงพยาบาลให้ admit / ย้าย / มอบหมายทีม ทำใน HIS เองอยู่แล้ว ข้อเหล่านี้เป็น OPT</p>
-  <table>
-    <thead><tr><th>operation</th><th>ทำอะไร</th><th>ระดับ</th></tr></thead>
-    <tbody>
-      <tr><td class="op-id">His.AdmitPatient</td><td>รับผู้ป่วยเข้านอน (สร้าง AN)</td><td><span class="pill opt">OPT</span></td></tr>
-      <tr><td class="op-id">His.TransferWard / TransferBed / CancelWardTransfer</td><td>ย้ายวอร์ด/เตียง/ยกเลิกการย้าย</td><td><span class="pill opt">OPT</span></td></tr>
-      <tr><td class="op-id">His.UpdatePrimaryDoctor / AddAssistingDoctor / RemoveAssistingDoctor / ClearAllDoctors</td><td>มอบหมาย/แก้ไขทีมแพทย์</td><td><span class="pill opt">OPT</span></td></tr>
-      <tr><td class="op-id">His.AssignPrimaryNurse</td><td>มอบหมายพยาบาลเจ้าของไข้</td><td><span class="pill opt">OPT</span></td></tr>
-    </tbody>
-  </table>
+  <div class="op">
+    <div class="ophead"><span class="opname">เหตุการณ์ผู้ป่วย (ADT) — HIS แจ้งเข้ามา</span><span class="opid">His.PatientEvents</span>
+      <span class="ep"><span class="m m-post">POST</span> {smartipd}/webhooks/adt <i>(HIS เรียกเข้า Smart IPD)</i></span>
+      <span class="opbadges"><span class="pill event">EVENT</span><span class="pill must">MUST</span><span class="pill ch3">3</span></span></div>
+    <div class="opbody">
+      <div class="uses">👉 <b>ใช้ทำอะไร:</b> เมื่อมีผู้ป่วย <b>รับเข้า / ย้ายเตียง / จำหน่าย</b> HIS ส่งข่าวเข้ามาทันที เพื่อให้กระดานผู้ป่วยของ Smart IPD เป็นปัจจุบัน (ถ้า HIS push ไม่ได้ Smart IPD จะคอยถาม GetAdmittedPatients แทน แต่ช้ากว่า)</div>
+      <div class="io out">📤 ข้อมูลที่ HIS ส่งเข้ามา (Payload)</div>
+      <table><thead><tr><th>ฟิลด์</th><th>ชนิด</th><th>คำอธิบาย</th></tr></thead><tbody>
+        <tr><td class="fld">eventType</td><td class="typ">string</td><td>ADMIT / TRANSFER / DISCHARGE / CANCEL</td></tr>
+        <tr><td class="fld">hn, an</td><td class="typ">string</td><td>ผู้ป่วยที่เกิดเหตุการณ์</td></tr>
+        <tr><td class="fld">wardCode, bedCode</td><td class="typ">string</td><td>ปลายทาง (กรณีรับเข้า/ย้าย)</td></tr>
+        <tr><td class="fld">eventDateTime</td><td class="typ">datetime</td><td>เวลาที่เกิดเหตุการณ์</td></tr>
+      </tbody></table>
+      <div class="sample"><span class="lbl">ตัวอย่าง</span>{ eventType: "TRANSFER", hn: "6712345", an: "AN680112", wardCode: "WD05", bedCode: "BED02", eventDateTime: "2025-01-14 13:05" }</div>
+    </div>
+  </div>
 </section>
 
 <!-- 3 APPOINTMENT -->
 <section id="sap">
-  <h2 class="sec">📅 3. นัดหมาย (Appointment) <span class="cnt">READ + WRITE · ถ้าใช้ฟีเจอร์นัดหมาย</span></h2>
-  <p>Smart IPD ใช้นัดหมายสำหรับ <strong>นัด follow-up ตอนจำหน่าย</strong> และพิมพ์บัตรนัด — นัดหมายเป็นของ HIS (ระบบนัดระดับโรงพยาบาล) ทั้งอ่านและเขียน <em>(ยืนยันจาก adapter: เรียก HIS API จริง เช่น <code>Appointment.PostponeAppointment</code>)</em></p>
+  <h2 class="sec">📅 3. นัดหมาย (Appointment) <span class="cnt">READ + WRITE · ถ้าใช้ฟีเจอร์นัด</span></h2>
+  <p class="secintro">ใช้ตอนทำ "นัด follow-up" ให้ผู้ป่วยตอนจำหน่าย และพิมพ์บัตรนัด — นัดหมายเป็นของ HIS</p>
 
-  <h4>READ — อ่านจาก HIS</h4>
-  <table>
-    <thead><tr><th>operation</th><th>ดึงอะไร</th><th>ระดับ</th></tr></thead>
-    <tbody>
-      <tr><td class="op-id">His.GetAppointmentCalendar / GetTimeSlots</td><td>ปฏิทินนัด + ช่องเวลาว่างของแพทย์</td><td><span class="pill must">MUST*</span></td></tr>
-      <tr><td class="op-id">His.GetPatientAppointments / GetAppointmentById / GetHistory</td><td>นัดของผู้ป่วย + รายละเอียด + ประวัติ</td><td><span class="pill must">MUST*</span></td></tr>
-      <tr><td class="op-id">His.GetNextAppointmentDate / GetAppointmentNextWeek</td><td>วันที่นัดถัดไป / นัดสัปดาห์หน้า</td><td><span class="pill opt">OPT</span></td></tr>
-      <tr><td class="op-id">His.GetWorkPlaces / GetCancelReasons / GetAppointActivities / GetDoctorAppoint / GetSurveyDoctorSchedule</td><td>master ของนัด (สถานที่/เหตุผลยกเลิก/กิจกรรม/ตารางแพทย์)</td><td><span class="pill opt">OPT</span></td></tr>
-      <tr><td class="op-id">His.GetDashboard / GetReportAppointmentList</td><td>สรุป/รายงานนัด</td><td><span class="pill opt">OPT</span></td></tr>
-    </tbody>
-  </table>
-  <p style="font-size:12.5px;color:var(--muted)">หมายเหตุ: บาง operation ใช้ HTTP POST แต่เป็น "การค้นหา (query)" → ถือเป็น READ เช่น GetAppointmentByDateHn, GetAppointmentCountByDate, GetAppointmentByAppointId, GetDistanceAppointment</p>
+  <div class="op">
+    <div class="ophead"><span class="opname">อ่านปฏิทิน / ช่องเวลาว่าง / นัดของผู้ป่วย</span><span class="opid">His.GetAppointmentCalendar · GetTimeSlots · GetPatientAppointments</span>
+      <span class="ep"><span class="m m-get">GET</span> /his/appointments/slots &nbsp;·&nbsp; /his/patients/{an}/appointments</span>
+      <span class="opbadges"><span class="pill read">READ</span><span class="pill must">MUST*</span><span class="pill ch2">2</span><span class="pill ch1">1</span></span></div>
+    <div class="opbody">
+      <div class="uses">👉 <b>ใช้ทำอะไร:</b> ดูว่าแพทย์/คลินิกมีช่องเวลาว่างเมื่อไหร่ และผู้ป่วยมีนัดอะไรอยู่บ้าง ก่อนจะลงนัดใหม่</div>
+      <div class="io out">📤 OUTPUT (ต่อ 1 ช่องเวลา / 1 นัด)</div>
+      <table><thead><tr><th>ฟิลด์</th><th>ชนิด</th><th>คำอธิบาย</th></tr></thead><tbody>
+        <tr><td class="fld">slotDateTime</td><td class="typ">datetime</td><td>วันเวลาที่ว่าง</td></tr>
+        <tr><td class="fld">doctorId / clinicCode</td><td class="typ">string</td><td>แพทย์/คลินิกของช่องนั้น</td></tr>
+        <tr><td class="fld">appointId</td><td class="typ">string</td><td>รหัสนัด (กรณีดูนัดที่มีอยู่)</td></tr>
+        <tr><td class="fld">appointType / status</td><td class="typ">string</td><td>ประเภทนัด / สถานะ</td></tr>
+      </tbody></table>
+    </div>
+  </div>
 
-  <h4>WRITE — ส่งกลับเข้า HIS</h4>
-  <table>
-    <thead><tr><th>operation</th><th>ทำอะไร</th><th>ระดับ</th></tr></thead>
-    <tbody>
-      <tr><td class="op-id">His.CreateAppointment</td><td>สร้างนัด (เช่น นัด follow-up หลังจำหน่าย)</td><td><span class="pill must">MUST*</span></td></tr>
-      <tr><td class="op-id">His.UpdateAppointment</td><td>แก้ไขนัด</td><td><span class="pill must">MUST*</span></td></tr>
-      <tr><td class="op-id">His.CancelAppointment / PostponeAppointment / AppointPostpone</td><td>ยกเลิก / เลื่อนนัด</td><td><span class="pill must">MUST*</span></td></tr>
-    </tbody>
-  </table>
-  <p style="font-size:12.5px;color:var(--muted)">* MUST เฉพาะกรณีที่โรงพยาบาลใช้ Smart IPD จัดการนัดหมาย — ถ้านัดทำใน HIS ทั้งหมด ข้อนี้เป็น OPT</p>
+  <div class="op">
+    <div class="ophead"><span class="opname">สร้าง / แก้ / ยกเลิก / เลื่อนนัด</span><span class="opid">His.CreateAppointment · UpdateAppointment · Cancel · Postpone</span>
+      <span class="ep"><span class="m m-post">POST</span> /his/appointments &nbsp; <span class="m m-patch">PATCH</span> /his/appointments/{appointId}</span>
+      <span class="opbadges"><span class="pill write">WRITE</span><span class="pill must">MUST*</span><span class="pill ch2">2</span></span></div>
+    <div class="opbody">
+      <div class="uses">👉 <b>ใช้ทำอะไร:</b> ตอนจำหน่ายผู้ป่วย แพทย์ลง "นัดครั้งหน้า" ผ่าน Smart IPD → ต้องเข้าไปอยู่ในระบบนัดของ HIS</div>
+      <div class="io in">📥 INPUT (สร้างนัด)</div>
+      <table><thead><tr><th>ฟิลด์</th><th>ชนิด</th><th>จำเป็น</th><th>คำอธิบาย</th></tr></thead><tbody>
+        <tr><td class="fld">hn / an</td><td class="typ">string</td><td class="req">ใช่</td><td>ผู้ป่วย</td></tr>
+        <tr><td class="fld">appointDateTime</td><td class="typ">datetime</td><td class="req">ใช่</td><td>วันเวลานัด</td></tr>
+        <tr><td class="fld">doctorId / clinicCode</td><td class="typ">string</td><td class="req">ใช่</td><td>นัดกับใคร/คลินิกไหน</td></tr>
+        <tr><td class="fld">appointType, note</td><td class="typ">string</td><td class="opt2">ไม่</td><td>ประเภทนัด, หมายเหตุ</td></tr>
+      </tbody></table>
+      <div class="io out">📤 OUTPUT</div>
+      <table><tbody><tr><td class="fld">appointId</td><td class="typ">string</td><td>รหัสนัดที่ HIS สร้างให้</td></tr></tbody></table>
+      <div class="sample"><span class="lbl">ตัวอย่าง</span>สร้างนัด: { an: "AN680112", appointDateTime: "2025-02-10 10:00", clinicCode: "MED-OPD", appointType: "follow-up" } → { appointId: "APT55012" }</div>
+    </div>
+  </div>
+  <p style="font-size:12.5px;color:var(--muted)">* MUST เฉพาะถ้าใช้ Smart IPD จัดการนัด — ถ้านัดทำใน HIS ทั้งหมด ข้อนี้เป็น OPT</p>
 </section>
 
-<!-- 4 MASTER DATA full -->
+<!-- 4 MASTER DATA -->
 <section id="sb">
-  <h2 class="sec">🗂️ 4. ข้อมูลตั้งต้น (Master Data) <span class="cnt">~40 รายการ</span></h2>
-  <p>เปลี่ยนช้า — แนะนำ sync เข้ามา cache (ช่องทาง 3) หรือเปิดให้อ่าน (ช่องทาง 1/2). ทุกรายการคืน <code>code</code> + <code>name</code> เป็นอย่างน้อย (บางรายการมีฟิลด์เพิ่มตามหมายเหตุ)</p>
+  <h2 class="sec">🗂️ 4. ข้อมูลตั้งต้น (Master Data) <span class="cnt">READ · ~40 รายการ</span></h2>
+  <p class="secintro">รายการมาตรฐานที่ทั้งโรงพยาบาลใช้ร่วมกัน เปลี่ยนช้า → แนะนำให้ sync มาเก็บไว้ (ช่องทาง 3) หรือเปิดให้อ่าน. ทุกรายการอย่างน้อยต้องมี <code>code</code> + <code>name</code></p>
+  <p class="secintro"><b>Path ตัวอย่าง:</b> <code>GET /his/master/{ชื่อ}</code> เช่น <code>/his/master/wards</code> · <code>/his/master/beds</code> · <code>/his/master/icd</code> · <code>/his/master/discharge-types</code></p>
 
-  <h4>📍 สถานที่ &amp; หน่วยงาน</h4>
+  <h3>📍 สถานที่ &amp; หน่วยงาน</h3>
   <table>
-    <thead><tr><th>Master</th><th>operation</th><th>ใช้ตอน</th><th>ระดับ</th></tr></thead>
+    <thead><tr><th>รายการ</th><th>operation</th><th>ฟิลด์สำคัญ</th><th>ใช้ตอน</th><th>ระดับ</th></tr></thead>
     <tbody>
-      <tr><td>วอร์ด (Wards)</td><td class="op-id">GetWards</td><td>จัดที่นอน / เลือกวอร์ด</td><td><span class="pill must">MUST</span></td></tr>
-      <tr><td>สถานะเตียง (Bed Status)</td><td class="op-id">GetBedStatusInquiry</td><td>ดูเตียงว่าง/ย้ายเตียง</td><td><span class="pill must">MUST</span></td></tr>
-      <tr><td>ห้องแล็บ / เอกซเรย์ / ห้องยา</td><td class="op-id">GetLabRooms · GetXRayRooms · GetPharmacyRooms</td><td>ปลายทางคำสั่ง</td><td><span class="pill must">MUST</span></td></tr>
-      <tr><td>หมวด/หน่วยงานคำสั่งทั่วไป</td><td class="op-id">GetGeneralOrderCategories · GetGeneralOrderWorkplaces</td><td>สั่ง general order</td><td><span class="pill must">MUST</span></td></tr>
-      <tr><td>ระดับความเร่งด่วน</td><td class="op-id">GetUrgentTypes</td><td>ระบุความเร่งด่วนคำสั่ง</td><td><span class="pill must">MUST</span></td></tr>
+      <tr><td>วอร์ด</td><td class="fld">GetWards</td><td>wardCode, wardName</td><td>จัดที่นอน/เลือกวอร์ด</td><td class="req">MUST</td></tr>
+      <tr><td>สถานะเตียง</td><td class="fld">GetBedStatus</td><td>bedCode, wardCode, สถานะ(ว่าง/ไม่ว่าง)</td><td>ดูเตียงว่าง/ย้ายเตียง</td><td class="req">MUST</td></tr>
+      <tr><td>ห้องแล็บ/เอกซเรย์/ยา</td><td class="fld">GetLabRooms · GetXRayRooms · GetPharmacyRooms</td><td>roomCode, roomName</td><td>ปลายทางคำสั่ง</td><td class="req">MUST</td></tr>
+      <tr><td>หมวด/หน่วยงานคำสั่งทั่วไป</td><td class="fld">GetGeneralOrderCategories · Workplaces</td><td>code, name</td><td>สั่ง general order</td><td class="req">MUST</td></tr>
+      <tr><td>ระดับความเร่งด่วน</td><td class="fld">GetUrgentTypes</td><td>code, name</td><td>ระบุความเร่งด่วนคำสั่ง</td><td class="req">MUST</td></tr>
     </tbody>
   </table>
 
-  <h4>🩺 รหัสวินิจฉัย &amp; การจำหน่าย</h4>
+  <h3>🩺 รหัสวินิจฉัย &amp; การจำหน่าย</h3>
   <table>
-    <thead><tr><th>Master</th><th>operation</th><th>ใช้ตอน</th><th>ระดับ</th></tr></thead>
+    <thead><tr><th>รายการ</th><th>operation</th><th>ฟิลด์สำคัญ</th><th>ระดับ</th></tr></thead>
     <tbody>
-      <tr><td>รหัสโรค ICD</td><td class="op-id">GetIcdCodes</td><td>ลงวินิจฉัย</td><td><span class="pill must">MUST</span></td></tr>
-      <tr><td>ชนิดวินิจฉัย / Pre-diagnosis / ข้างของโรค</td><td class="op-id">GetDiagnosisTypes · GetPreDiagnosisTypes · GetDiagnosisSides</td><td>ลงวินิจฉัย</td><td><span class="pill must">MUST</span></td></tr>
-      <tr><td>สถานะ/ประเภทการจำหน่าย</td><td class="op-id">GetDischargeStatuses · GetDischargeTypes</td><td>สรุปจำหน่าย</td><td><span class="pill must">MUST</span></td></tr>
-      <tr><td>อวัยวะ (Organs)</td><td class="op-id">GetOrgans</td><td>วินิจฉัย / เอกซเรย์</td><td><span class="pill must">MUST</span></td></tr>
-      <tr><td>เหตุผลของคำสั่ง</td><td class="op-id">GetOrderReasons</td><td>แนบเหตุผลคำสั่ง</td><td><span class="pill opt">OPT</span></td></tr>
-      <tr><td>วิธีวัด (Measurement Methods)</td><td class="op-id">GetMeasurementMethods</td><td>สัญญาณชีพ/การวัด</td><td><span class="pill opt">OPT</span></td></tr>
+      <tr><td>รหัสโรค ICD</td><td class="fld">GetIcdCodes</td><td>icdCode, ชื่อโรค</td><td class="req">MUST</td></tr>
+      <tr><td>ชนิดวินิจฉัย / pre-diag / ข้างของโรค</td><td class="fld">GetDiagnosisTypes · PreDiagnosisTypes · DiagnosisSides</td><td>code, name</td><td class="req">MUST</td></tr>
+      <tr><td>สถานะ/ประเภทการจำหน่าย</td><td class="fld">GetDischargeStatuses · DischargeTypes</td><td>code, name</td><td class="req">MUST</td></tr>
+      <tr><td>อวัยวะ (organs)</td><td class="fld">GetOrgans</td><td>code, name</td><td class="req">MUST</td></tr>
+      <tr><td>เหตุผลคำสั่ง / วิธีวัด</td><td class="fld">GetOrderReasons · MeasurementMethods</td><td>code, name</td><td class="opt2">OPT</td></tr>
     </tbody>
   </table>
 
-  <h4>👥 ประชากร &amp; การเงิน (สำหรับใบรับผู้ป่วย / จ่ายยา)</h4>
+  <h3>👥 ประชากร &amp; การเงิน (สำหรับใบรับผู้ป่วย / จ่ายยา)</h3>
   <table>
-    <thead><tr><th>Master</th><th>operation</th><th>ใช้ตอน</th><th>ระดับ</th></tr></thead>
+    <thead><tr><th>รายการ</th><th>operation</th><th>ระดับ</th></tr></thead>
     <tbody>
-      <tr><td>ประเภทสิทธิ/การเงิน</td><td class="op-id">GetFinanceTypes</td><td>จ่ายยา/คิดค่าใช้จ่าย</td><td><span class="pill opt">OPT</span></td></tr>
-      <tr><td>ประเทศ / ชนิดที่อยู่</td><td class="op-id">GetCountries · GetAddressTypes</td><td>แบบฟอร์มรับผู้ป่วย</td><td><span class="pill opt">OPT</span></td></tr>
-      <tr><td>สัญชาติ / ศาสนา / สถานภาพ / เชื้อชาติ / ระดับการศึกษา</td><td class="op-id">GetNationalities · GetReligions · GetMaritalStatuses · GetEthnicities · GetEducationalLevels</td><td>แบบฟอร์มรับผู้ป่วย (demographics)</td><td><span class="pill opt">OPT</span></td></tr>
+      <tr><td>ประเภทสิทธิ/การเงิน</td><td class="fld">GetFinanceTypes</td><td class="opt2">OPT</td></tr>
+      <tr><td>ประเทศ / ชนิดที่อยู่</td><td class="fld">GetCountries · GetAddressTypes</td><td class="opt2">OPT</td></tr>
+      <tr><td>สัญชาติ/ศาสนา/สถานภาพ/เชื้อชาติ/ระดับการศึกษา</td><td class="fld">GetNationalities · Religions · MaritalStatuses · Ethnicities · EducationalLevels</td><td class="opt2">OPT</td></tr>
     </tbody>
   </table>
-  <div class="callout warn"><p><strong>ข้อควรตกลง:</strong> code list ของ "แบบฟอร์มรับผู้ป่วย" บางส่วน (เช่น วิธีมา รพ., ชนิด chief complaint, ความสัมพันธ์ผู้ติดต่อ) ปัจจุบันมาจาก HIS แต่อาจเปลี่ยนเป็น Smart IPD กำหนดเองได้ (ดูข้อ 10) — ต้องตกลงรายการต่อ HIS</p></div>
 </section>
 
-<!-- 4 DRUG catalog -->
+<!-- 5 DRUG -->
 <section id="sb2">
-  <h2 class="sec">💊 5. ยา (Drug Catalog) <span class="cnt">core ของการสั่งยา</span></h2>
+  <h2 class="sec">💊 5. ยา (Drug Catalog)</h2>
+  <p class="secintro">บัญชียาทั้งหมดของโรงพยาบาล — Smart IPD ใช้ค้นหา/เลือกยาตอนแพทย์สั่ง</p>
+  <div class="op">
+    <div class="ophead"><span class="opname">บัญชียา + ค้นหายา</span><span class="opid">His.GetDrugCatalog · SearchDrugs · GetMedicationDetail</span>
+      <span class="ep"><span class="m m-get">GET</span> /his/master/drugs?q={คำค้น} &nbsp;·&nbsp; /his/master/drugs/{drugCode}</span>
+      <span class="opbadges"><span class="pill read">READ</span><span class="pill must">MUST</span><span class="pill ch1">1</span><span class="pill ch2">2</span><span class="pill ch3">3</span></span></div>
+    <div class="opbody">
+      <div class="uses">👉 <b>ใช้ทำอะไร:</b> ให้แพทย์พิมพ์ชื่อยา → เลือกจากบัญชี → ระบบรู้รายละเอียดยาเพื่อสั่งและคิดเงิน</div>
+      <div class="io out">📤 OUTPUT (ต่อ 1 รายการยา)</div>
+      <table><thead><tr><th>ฟิลด์</th><th>ชนิด</th><th>คำอธิบาย</th></tr></thead><tbody>
+        <tr><td class="fld">drugCode</td><td class="typ">string</td><td>รหัสยา (ใช้อ้างตอนสั่ง)</td></tr>
+        <tr><td class="fld">tradeName</td><td class="typ">string</td><td>ชื่อการค้า</td></tr>
+        <tr><td class="fld">genericName</td><td class="typ">string</td><td>ชื่อสามัญ</td></tr>
+        <tr><td class="fld">dosageForm</td><td class="typ">string</td><td>รูปแบบ (เม็ด/น้ำ/ฉีด)</td></tr>
+        <tr><td class="fld">strength</td><td class="typ">string</td><td>ความแรง (เช่น 500 mg)</td></tr>
+        <tr><td class="fld">route</td><td class="typ">string</td><td>วิธีให้ (กิน/ฉีด IV)</td></tr>
+        <tr><td class="fld">unit</td><td class="typ">string</td><td>หน่วย (เม็ด/ขวด)</td></tr>
+        <tr><td class="fld">price</td><td class="typ">number</td><td>ราคา/หน่วย</td></tr>
+        <tr><td class="fld">properties[]</td><td class="typ">list</td><td>คุณสมบัติ เช่น ยาเสี่ยงสูง (HAD), ยาเสพติด</td></tr>
+        <tr><td class="fld">isActive</td><td class="typ">bool</td><td>ยังใช้งานอยู่หรือไม่</td></tr>
+      </tbody></table>
+      <div class="sample"><span class="lbl">ตัวอย่าง 1 รายการ</span>DRG0045 | Augmentin | Amoxicillin/Clavulanic | เม็ด | 625 mg | กิน | เม็ด | 12.00 | [—] | active</div>
+    </div>
+  </div>
   <table>
-    <thead><tr><th>operation</th><th>คืออะไร</th><th>ระดับ</th></tr></thead>
+    <thead><tr><th>รายการเสริมของยา</th><th>operation</th><th>คำอธิบาย</th><th>ระดับ</th></tr></thead>
     <tbody>
-      <tr><td class="op-id">His.SearchDrugs / SearchMedications</td><td>ค้นหายา (รหัส, ชื่อการค้า/สามัญ, รูปแบบ, ความแรง, route, unit, ราคา, คุณสมบัติ HAD/ยาเสพติด)</td><td><span class="pill must">MUST</span></td></tr>
-      <tr><td class="op-id">His.GetMedicationDetail</td><td>รายละเอียดยา 1 รายการ</td><td><span class="pill must">MUST</span></td></tr>
-      <tr><td class="op-id">His.GetDrugTiming · GetDrugUsing · GetDosingIntervals</td><td>เวลาให้ยา / วิธีใช้ / ช่วงห่างการให้</td><td><span class="pill must">MUST</span></td></tr>
-      <tr><td class="op-id">His.GetRoutes · GetDosageForms · GetDosingUnits</td><td>วิธีให้ / รูปแบบยา / หน่วยขนาด</td><td><span class="pill must">MUST</span></td></tr>
-      <tr><td class="op-id">His.GetDrugCondition / GetPrescribingConditions</td><td>เงื่อนไขการสั่งยา</td><td><span class="pill opt">OPT</span></td></tr>
-      <tr><td class="op-id">His.CheckDrugInteractions</td><td>คู่ยาที่ตีกัน (Drug Interaction)</td><td><span class="pill opt">OPT</span></td></tr>
-      <tr><td class="op-id">His.GetDrugProperties · GetDrugWarnings</td><td>คุณสมบัติยา / คำเตือน</td><td><span class="pill opt">OPT</span></td></tr>
-      <tr><td class="op-id">His.GetMedicationCategories · GetFormularies</td><td>หมวดยา / บัญชียาโรงพยาบาล</td><td><span class="pill opt">OPT</span></td></tr>
-      <tr><td class="op-id">His.GetMedicationTemplates (+ detail/advanced/favorites)</td><td>ชุดยาสำเร็จ / รายการโปรด</td><td><span class="pill opt">OPT</span></td></tr>
-      <tr><td class="op-id">His.GetDispenseDrugUsualDose</td><td>ขนาดยาปกติของผู้ป่วย (dose check)</td><td><span class="pill opt">OPT</span></td></tr>
-      <tr><td class="op-id">His.GetStandardTimeOptions / DrugTimingStandardTime</td><td>ตัวเลือกเวลามาตรฐานสำหรับบริหารยา</td><td><span class="pill opt">OPT</span></td></tr>
+      <tr><td>เวลาให้ยา/วิธีใช้/ช่วงห่าง</td><td class="fld">GetDrugTiming · DrugUsing · DosingIntervals</td><td>ตัวเลือกตอนสั่ง (เช่น เช้า-เย็น, ก่อนอาหาร)</td><td class="req">MUST</td></tr>
+      <tr><td>route / รูปแบบ / หน่วยขนาด</td><td class="fld">GetRoutes · DosageForms · DosingUnits</td><td>ตัวเลือกมาตรฐาน</td><td class="req">MUST</td></tr>
+      <tr><td>คู่ยาที่ตีกัน</td><td class="fld">CheckDrugInteractions</td><td>เตือนความปลอดภัย</td><td class="opt2">OPT</td></tr>
+      <tr><td>หมวดยา/บัญชียา รพ./ชุดยาสำเร็จ</td><td class="fld">GetMedicationCategories · Formularies · Templates</td><td>จัดกลุ่ม/ชุดสั่งเร็ว</td><td class="opt2">OPT</td></tr>
     </tbody>
   </table>
 </section>
 
-<!-- 5 lab/xray catalog -->
+<!-- 6 LAB/XRAY -->
 <section id="sb3">
   <h2 class="sec">🧪 6. แล็บ / เอกซเรย์ (Catalog)</h2>
+  <p class="secintro">รายการตรวจที่สั่งได้ — ใช้ตอนแพทย์เลือกสั่งตรวจ</p>
+  <p class="secintro"><b>Path ตัวอย่าง:</b> <code>GET /his/master/labs</code> · <code>/his/master/lab-groups</code> · <code>/his/master/xrays</code> · <code>/his/master/xray-modalities</code></p>
   <table>
-    <thead><tr><th>operation</th><th>คืออะไร</th><th>ระดับ</th></tr></thead>
+    <thead><tr><th>รายการ</th><th>operation</th><th>ฟิลด์สำคัญ</th><th>ระดับ</th></tr></thead>
     <tbody>
-      <tr><td class="op-id">His.GetLabTemplates (+ favorite / for-appointment)</td><td>รายการ/ชุดตรวจแล็บสำหรับสั่ง</td><td><span class="pill must">MUST</span></td></tr>
-      <tr><td class="op-id">His.GetLabGroups</td><td>กลุ่มแล็บ (จัดหมวดผล)</td><td><span class="pill must">MUST</span></td></tr>
-      <tr><td class="op-id">His.GetXrayItems (+ for-appointment)</td><td>รายการเอกซเรย์สำหรับสั่ง</td><td><span class="pill must">MUST</span></td></tr>
-      <tr><td class="op-id">His.GetXrayModalities (+ history modalities)</td><td>ชนิดการถ่าย (modality)</td><td><span class="pill must">MUST</span></td></tr>
+      <tr><td>รายการ/ชุดตรวจแล็บ</td><td class="fld">GetLabTemplates (+ favorite)</td><td>labCode, ชื่อรายการ, ราคา</td><td class="req">MUST</td></tr>
+      <tr><td>กลุ่มแล็บ</td><td class="fld">GetLabGroups</td><td>groupCode, groupName</td><td class="req">MUST</td></tr>
+      <tr><td>รายการเอกซเรย์</td><td class="fld">GetXrayItems</td><td>xrayCode, ชื่อรายการ, ราคา</td><td class="req">MUST</td></tr>
+      <tr><td>ชนิดการถ่าย (modality)</td><td class="fld">GetXrayModalities</td><td>code, name (เช่น CT, MRI, X-ray)</td><td class="req">MUST</td></tr>
     </tbody>
   </table>
 </section>
 
-<!-- 6 directory -->
+<!-- 7 DIRECTORY -->
 <section id="sb4">
   <h2 class="sec">👥 7. บุคลากร (Directory)</h2>
-  <table>
-    <thead><tr><th>operation</th><th>คืออะไร</th><th>ระดับ</th></tr></thead>
-    <tbody>
-      <tr><td class="op-id">His.GetDoctors / GetDoctorLookup / GetDoctor</td><td>ทำเนียบแพทย์ (รหัส, ชื่อ, สาขา, เลขใบประกอบ, สถานะ)</td><td><span class="pill must">MUST</span></td></tr>
-      <tr><td class="op-id">His.GetNurses / GetNurse</td><td>ทำเนียบพยาบาล</td><td><span class="pill must">MUST</span></td></tr>
-      <tr><td class="op-id">His.GetPharmacists</td><td>ทำเนียบเภสัชกร (สำหรับงานตรวจสอบจ่ายยา)</td><td><span class="pill opt">OPT</span></td></tr>
-    </tbody>
-  </table>
-</section>
-
-<!-- 7 results -->
-<section id="sc">
-  <h2 class="sec">🔬 8. ผลตรวจ</h2>
+  <p class="secintro">ใช้ผูกว่า "ใครเป็นคนสั่ง/ทำรายการ/ตรวจสอบ"</p>
   <div class="op">
-    <div class="ophead"><span class="opname">ผลแล็บ</span><span class="opid">His.GetLabResults (+ comparison)</span>
-      <span class="opbadges"><span class="pill read">READ</span><span class="pill must">MUST</span><span class="pill ch1">1</span><span class="pill ch2">2</span></span></div>
-    <div class="opbody">
-      <div class="io in">Input</div>
-      <table><tbody><tr><td><code>an</code>/<code>hn</code></td><td>ผู้ป่วย</td></tr><tr><td><code>startDate</code>, <code>endDate</code></td><td>ช่วงเวลา (ไม่บังคับ)</td></tr></tbody></table>
-      <div class="io out">Output (ต่อผล)</div>
-      <table><tbody>
-        <tr><td><code>collectedDateTime</code></td><td>วันเวลาตรวจ</td></tr>
-        <tr><td><code>testName</code>, <code>labGroup</code></td><td>ชื่อรายการ + กลุ่ม</td></tr>
-        <tr><td><code>value</code>, <code>unit</code>, <code>referenceRange</code></td><td>ค่า + หน่วย + ค่าอ้างอิง</td></tr>
-        <tr><td><code>abnormalFlag</code></td><td>ปกติ/สูง/ต่ำ/วิกฤต</td></tr>
-      </tbody></table>
-    </div>
-  </div>
-  <div class="op">
-    <div class="ophead"><span class="opname">ผลเอกซเรย์ + ภาพ (PACS)</span><span class="opid">His.GetXrayResults</span>
+    <div class="ophead"><span class="opname">ทำเนียบแพทย์ / พยาบาล / เภสัชกร</span><span class="opid">His.GetDoctors · GetNurses · GetPharmacists</span>
+      <span class="ep"><span class="m m-get">GET</span> /his/staff?role={doctor|nurse|pharmacist}</span>
       <span class="opbadges"><span class="pill read">READ</span><span class="pill must">MUST</span><span class="pill ch2">2</span><span class="pill ch1">1</span></span></div>
     <div class="opbody">
-      <div class="io out">Output</div>
+      <div class="io out">📤 OUTPUT (ต่อ 1 คน)</div>
+      <table><thead><tr><th>ฟิลด์</th><th>ชนิด</th><th>คำอธิบาย</th></tr></thead><tbody>
+        <tr><td class="fld">userId</td><td class="typ">string</td><td>รหัสบุคลากร</td></tr>
+        <tr><td class="fld">fullName</td><td class="typ">string</td><td>ชื่อ-สกุล</td></tr>
+        <tr><td class="fld">role</td><td class="typ">string</td><td>doctor / nurse / pharmacist</td></tr>
+        <tr><td class="fld">specialty</td><td class="typ">string</td><td>สาขา (เช่น อายุรกรรม)</td></tr>
+        <tr><td class="fld">licenseNo</td><td class="typ">string</td><td>เลขใบประกอบวิชาชีพ</td></tr>
+        <tr><td class="fld">isActive</td><td class="typ">bool</td><td>ยังปฏิบัติงานอยู่หรือไม่</td></tr>
+      </tbody></table>
+      <div class="sample"><span class="lbl">ตัวอย่าง</span>D00123 | นพ.สมหญิง รักษาดี | doctor | อายุรกรรม | ว.12345 | active</div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 RESULTS -->
+<section id="sc">
+  <h2 class="sec">🔬 8. ผลตรวจ <span class="cnt">READ</span></h2>
+  <p class="secintro">Smart IPD ดึงผลมาแสดงให้แพทย์/พยาบาลดูประกอบการรักษา (ไม่ได้เก็บผลเอง)</p>
+
+  <div class="op">
+    <div class="ophead"><span class="opname">ผลแล็บ</span><span class="opid">His.GetLabResults</span>
+      <span class="ep"><span class="m m-get">GET</span> /his/patients/{an}/lab-results?from={date}&amp;to={date}</span>
+      <span class="opbadges"><span class="pill read">READ</span><span class="pill must">MUST</span><span class="pill ch1">1</span><span class="pill ch2">2</span></span></div>
+    <div class="opbody">
+      <div class="uses">👉 <b>ใช้ทำอะไร:</b> ดูผลเลือด/ผลแล็บของผู้ป่วย พร้อมเทียบค่าปกติและไฮไลต์ค่าผิดปกติ</div>
+      <div class="io in">📥 INPUT</div>
       <table><tbody>
-        <tr><td><code>examDateTime</code>, <code>modality</code>, <code>examName</code></td><td>ข้อมูลการตรวจ</td></tr>
-        <tr><td><code>reportText</code>, <code>reportStatus</code></td><td>ผลอ่าน + สถานะ</td></tr>
-        <tr><td><code>pacsUrl</code> / <code>studyUid</code></td><td>ลิงก์/รหัสเปิดภาพใน PACS viewer</td></tr>
+        <tr><td class="fld">an / hn</td><td class="typ">string</td><td class="req">ใช่</td><td>ผู้ป่วย</td></tr>
+        <tr><td class="fld">startDate, endDate</td><td class="typ">date</td><td class="opt2">ไม่</td><td>ช่วงเวลา</td></tr>
+      </tbody></table>
+      <div class="io out">📤 OUTPUT (ต่อ 1 ผล)</div>
+      <table><thead><tr><th>ฟิลด์</th><th>ชนิด</th><th>คำอธิบาย</th></tr></thead><tbody>
+        <tr><td class="fld">collectedDateTime</td><td class="typ">datetime</td><td>วันเวลาตรวจ</td></tr>
+        <tr><td class="fld">testName</td><td class="typ">string</td><td>ชื่อรายการตรวจ</td></tr>
+        <tr><td class="fld">value</td><td class="typ">string</td><td>ค่าผล</td></tr>
+        <tr><td class="fld">unit</td><td class="typ">string</td><td>หน่วย</td></tr>
+        <tr><td class="fld">referenceRange</td><td class="typ">string</td><td>ค่าอ้างอิง (ช่วงปกติ)</td></tr>
+        <tr><td class="fld">abnormalFlag</td><td class="typ">string</td><td>ปกติ / สูง (H) / ต่ำ (L) / วิกฤต</td></tr>
+        <tr><td class="fld">labGroup</td><td class="typ">string</td><td>กลุ่มแล็บ</td></tr>
+      </tbody></table>
+      <div class="sample"><span class="lbl">ตัวอย่าง</span>2025-01-14 07:10 | Hemoglobin | 9.8 | g/dL | 12-16 | ต่ำ (L) | CBC</div>
+    </div>
+  </div>
+
+  <div class="op">
+    <div class="ophead"><span class="opname">ผลเอกซเรย์ + ลิงก์เปิดภาพ (PACS)</span><span class="opid">His.GetXrayResults</span>
+      <span class="ep"><span class="m m-get">GET</span> /his/patients/{an}/xray-results</span>
+      <span class="opbadges"><span class="pill read">READ</span><span class="pill must">MUST</span><span class="pill ch2">2</span><span class="pill ch1">1</span></span></div>
+    <div class="opbody">
+      <div class="uses">👉 <b>ใช้ทำอะไร:</b> ดูผลอ่านเอกซเรย์ และกดลิงก์ไปเปิด "ภาพจริง" ในระบบ PACS</div>
+      <div class="io out">📤 OUTPUT</div>
+      <table><thead><tr><th>ฟิลด์</th><th>ชนิด</th><th>คำอธิบาย</th></tr></thead><tbody>
+        <tr><td class="fld">examDateTime</td><td class="typ">datetime</td><td>วันเวลาตรวจ</td></tr>
+        <tr><td class="fld">modality</td><td class="typ">string</td><td>ชนิดการถ่าย (X-ray/CT/MRI)</td></tr>
+        <tr><td class="fld">examName</td><td class="typ">string</td><td>ชื่อรายการ</td></tr>
+        <tr><td class="fld">reportText</td><td class="typ">text</td><td>ผลอ่านโดยรังสีแพทย์</td></tr>
+        <tr><td class="fld">reportStatus</td><td class="typ">string</td><td>สถานะ (รออ่าน/อ่านแล้ว)</td></tr>
+        <tr><td class="fld">pacsUrl / studyUid</td><td class="typ">string</td><td>ลิงก์/รหัสเปิดภาพใน PACS viewer</td></tr>
       </tbody></table>
     </div>
   </div>
 </section>
 
-<!-- 9 VITAL SIGNS -->
+<!-- 9 VITALS -->
 <section id="svit">
   <h2 class="sec">❤️ 9. สัญญาณชีพ (Vital Signs) <span class="cnt">READ + WRITE</span></h2>
-  <p>ปัจจุบันสัญญาณชีพเป็นของ HIS — Smart IPD <strong>อ่าน</strong>เพื่อแสดงกราฟ/ตาราง และ <strong>เขียน</strong>เมื่อพยาบาลบันทึก <em>(ยืนยันจาก adapter: write ผ่าน HIS API <code>VitalSigns.AddOrUpdateVitalSigns</code>; read/delete ผ่าน DB)</em></p>
-  <table>
-    <thead><tr><th>operation</th><th>ทิศทาง</th><th>ทำอะไร</th><th>ระดับ</th></tr></thead>
-    <tbody>
-      <tr><td class="op-id">His.GetVitalSigns / GetVitalSignsDetail / GetVitalSignsChart</td><td><span class="pill read">READ</span></td><td>รายการ/รายละเอียด/กราฟสัญญาณชีพ</td><td><span class="pill must">MUST*</span></td></tr>
-      <tr><td class="op-id">His.CreateVitalSigns</td><td><span class="pill write">WRITE</span></td><td>บันทึกสัญญาณชีพใหม่</td><td><span class="pill must">MUST*</span></td></tr>
-      <tr><td class="op-id">His.UpdateVitalSigns / DeleteVitalSigns</td><td><span class="pill write">WRITE</span></td><td>แก้ไข / ลบ</td><td><span class="pill must">MUST*</span></td></tr>
-    </tbody>
-  </table>
-  <div class="callout ipd"><p>* หาก Smart IPD รับสัญญาณชีพเป็นเจ้าของเอง (พยาบาล IPD บันทึกใน Smart IPD) → ย้ายเป็น <strong>local</strong> และ HIS ไม่ต้องจัดข้อนี้ — ตกลงกับโรงพยาบาล</p></div>
+  <p class="secintro">ปัจจุบันสัญญาณชีพเป็นของ HIS — Smart IPD อ่านมาแสดงกราฟ/ตาราง และเขียนกลับเมื่อพยาบาลบันทึก</p>
+  <div class="op">
+    <div class="ophead"><span class="opname">อ่าน / บันทึก / แก้ / ลบ สัญญาณชีพ</span><span class="opid">His.GetVitalSigns · AddOrUpdateVitalSigns · DeleteVitalSigns</span>
+      <span class="ep"><span class="m m-get">GET</span> /his/patients/{an}/vitals &nbsp; <span class="m m-post">POST</span> /his/patients/{an}/vitals &nbsp; <span class="m m-delete">DELETE</span> /his/vitals/{id}</span>
+      <span class="opbadges"><span class="pill read">READ</span><span class="pill write">WRITE</span><span class="pill must">MUST*</span><span class="pill ch2">2</span><span class="pill ch1">1</span></span></div>
+    <div class="opbody">
+      <div class="io out">📤 ฟิลด์สัญญาณชีพ (ต่อ 1 ครั้งที่วัด)</div>
+      <table><thead><tr><th>ฟิลด์</th><th>ชนิด</th><th>คำอธิบาย</th></tr></thead><tbody>
+        <tr><td class="fld">recordedDateTime</td><td class="typ">datetime</td><td>วันเวลาที่วัด</td></tr>
+        <tr><td class="fld">bloodPressure</td><td class="typ">string</td><td>ความดัน เช่น 120/80</td></tr>
+        <tr><td class="fld">pulse</td><td class="typ">int</td><td>ชีพจร (ครั้ง/นาที)</td></tr>
+        <tr><td class="fld">respiratoryRate</td><td class="typ">int</td><td>การหายใจ (ครั้ง/นาที)</td></tr>
+        <tr><td class="fld">temperature</td><td class="typ">number</td><td>อุณหภูมิ (°C)</td></tr>
+        <tr><td class="fld">spo2</td><td class="typ">int</td><td>ออกซิเจนปลายนิ้ว (%)</td></tr>
+      </tbody></table>
+      <div class="sample"><span class="lbl">ตัวอย่าง</span>2025-01-14 06:00 | BP 128/82 | ชีพจร 88 | หายใจ 20 | อุณหภูมิ 37.8 | SpO2 96%</div>
+    </div>
+  </div>
+  <div class="callout ipd"><p>* หาก Smart IPD รับสัญญาณชีพเป็นเจ้าของเอง (พยาบาล IPD บันทึกใน Smart IPD) → ย้ายเป็น local และ HIS ไม่ต้องจัดข้อนี้ — ตกลงกับโรงพยาบาล</p></div>
 </section>
 
-<!-- 10 write-back -->
+<!-- 10 WRITE-BACK -->
 <section id="sd">
-  <h2 class="sec">📤 10. ส่งคำสั่งกลับ &amp; สถานะ</h2>
-  <div class="callout warn"><p><strong>WRITE ทั้งหมดผ่านช่องทาง 2 (API ของ HIS)</strong> เพื่อให้ผ่านกฎเกณฑ์/การคิดเงินของ HIS — ห้ามเขียน DB ตรง</p></div>
+  <h2 class="sec">📤 10. ส่งคำสั่งกลับ &amp; แจ้งสถานะ <span class="cnt">WRITE + EVENT</span></h2>
+  <p class="secintro">คำสั่งที่หมอสั่งใน Smart IPD ต้องไหลเข้า HIS เพื่อให้ห้องยา/แล็บ/รังสีรับไปทำ + คิดเงิน</p>
+  <div class="callout warn"><p><strong>สำคัญ:</strong> การเขียนกลับทั้งหมดต้องผ่าน <b>API ของ HIS</b> (ผ่านการคิดเงิน/กฎของ HIS) — ห้ามให้ Smart IPD เขียน DB ตรง</p></div>
+
   <div class="op">
     <div class="ophead"><span class="opname">ส่งคำสั่ง (ยา/แล็บ/เอกซเรย์/ทั่วไป)</span><span class="opid">His.SubmitOrder</span>
+      <span class="ep"><span class="m m-post">POST</span> /his/orders</span>
       <span class="opbadges"><span class="pill write">WRITE</span><span class="pill must">MUST</span><span class="pill ch2">2</span></span></div>
     <div class="opbody">
-      <p class="purpose">Smart IPD ส่ง "สำเนาคำสั่ง" เข้า HIS เพื่อให้ห้องยา/แล็บ/รังสีรับไปทำ + คิดเงิน แล้ว HIS ตอบ <code>orderId</code> กลับ <em>(ยืนยันจาก adapter: เขียนผ่าน HIS <code>Finance.AddOrUpdateOrder</code> และ <code>Drug.AddUpdateDoctorDrugOrder</code> — order จึงผูกกับระบบการเงิน/เภสัชของ HIS)</em></p>
-      <div class="io in">Input</div>
-      <table><tbody>
-        <tr><td><code>an</code></td><td>ผู้ป่วย</td></tr>
-        <tr><td><code>orderType</code></td><td>MEDICATION / LAB / XRAY / GENERAL</td></tr>
-        <tr><td><code>itemCode</code></td><td>drugCode/labCode/xrayCode</td></tr>
-        <tr><td><code>dose, route, frequency, quantity</code></td><td>กรณียา</td></tr>
-        <tr><td><code>ordererId</code>, <code>orderMode</code></td><td>แพทย์ผู้สั่ง / ONE_DAY|CONTINUE</td></tr>
+      <div class="uses">👉 <b>ใช้ทำอะไร:</b> แพทย์สั่งยา/ตรวจใน Smart IPD → ส่งเข้า HIS → HIS คิดเงิน+ส่งห้องที่เกี่ยวข้อง → ตอบ <b>รหัสคำสั่ง</b> กลับมา</div>
+      <div class="io in">📥 INPUT — Smart IPD ส่งให้ HIS</div>
+      <table><thead><tr><th>ฟิลด์</th><th>ชนิด</th><th>จำเป็น</th><th>คำอธิบาย</th></tr></thead><tbody>
+        <tr><td class="fld">an</td><td class="typ">string</td><td class="req">ใช่</td><td>ผู้ป่วย</td></tr>
+        <tr><td class="fld">orderType</td><td class="typ">string</td><td class="req">ใช่</td><td>MEDICATION / LAB / XRAY / GENERAL</td></tr>
+        <tr><td class="fld">itemCode</td><td class="typ">string</td><td class="req">ใช่</td><td>รหัสยา/แล็บ/เอกซเรย์</td></tr>
+        <tr><td class="fld">dose, route, frequency, quantity</td><td class="typ">—</td><td class="opt2">กรณียา</td><td>ขนาด/วิธี/ความถี่/จำนวน</td></tr>
+        <tr><td class="fld">ordererId</td><td class="typ">string</td><td class="req">ใช่</td><td>แพทย์ผู้สั่ง</td></tr>
+        <tr><td class="fld">orderMode</td><td class="typ">string</td><td class="req">ใช่</td><td>ONE_DAY (ครั้งเดียว) / CONTINUE (ต่อเนื่อง)</td></tr>
       </tbody></table>
-      <div class="io out">Output</div>
-      <table><tbody><tr><td><code>orderId</code></td><td>รหัสคำสั่งใน HIS</td></tr><tr><td><code>accepted</code> / <code>rejectReason</code></td><td>ผลการรับคำสั่ง</td></tr></tbody></table>
+      <div class="io out">📤 OUTPUT — HIS ตอบกลับ</div>
+      <table><tbody>
+        <tr><td class="fld">orderId</td><td class="typ">string</td><td><b>รหัสคำสั่งใน HIS</b> (Smart IPD เก็บไว้ติดตามสถานะ)</td></tr>
+        <tr><td class="fld">accepted</td><td class="typ">bool</td><td>รับคำสั่งสำเร็จหรือไม่</td></tr>
+        <tr><td class="fld">rejectReason</td><td class="typ">string</td><td>เหตุผลถ้าถูกปฏิเสธ</td></tr>
+      </tbody></table>
+      <div class="sample"><span class="lbl">ตัวอย่าง</span>ส่ง: { an:"AN680112", orderType:"MEDICATION", itemCode:"DRG0045", dose:"1 เม็ด", route:"กิน", frequency:"วันละ 3 ครั้งหลังอาหาร", ordererId:"D00123", orderMode:"CONTINUE" } → ตอบ: { orderId:"ORD78901", accepted:true }</div>
     </div>
   </div>
+
   <div class="op">
-    <div class="ophead"><span class="opname">แก้ไข / ยกเลิก / พัก / กลับมาใช้</span><span class="opid">His.UpdateOrder</span>
+    <div class="ophead"><span class="opname">แก้ไข / ยกเลิก / พัก / กลับมาใช้คำสั่ง</span><span class="opid">His.UpdateOrder</span>
+      <span class="ep"><span class="m m-patch">PATCH</span> /his/orders/{orderId}</span>
       <span class="opbadges"><span class="pill write">WRITE</span><span class="pill must">MUST</span><span class="pill ch2">2</span></span></div>
-    <div class="opbody"><div class="io in">Input</div>
-      <table><tbody><tr><td><code>orderId</code></td><td>คำสั่งที่ปรับ</td></tr><tr><td><code>action</code></td><td>UPDATE/CANCEL/HOLD/RESUME</td></tr><tr><td><code>reason</code></td><td>เหตุผล (กรณียกเลิก/พัก)</td></tr></tbody></table>
+    <div class="opbody">
+      <div class="io in">📥 INPUT</div>
+      <table><tbody>
+        <tr><td class="fld">orderId</td><td class="typ">string</td><td class="req">ใช่</td><td>คำสั่งที่จะปรับ</td></tr>
+        <tr><td class="fld">action</td><td class="typ">string</td><td class="req">ใช่</td><td>UPDATE / CANCEL / HOLD / RESUME</td></tr>
+        <tr><td class="fld">reason</td><td class="typ">string</td><td class="opt2">กรณียกเลิก/พัก</td><td>เหตุผล</td></tr>
+      </tbody></table>
     </div>
   </div>
+
   <div class="op">
     <div class="ophead"><span class="opname">แจ้งสถานะคำสั่งกลับ</span><span class="opid">His.OrderStatusFeedback</span>
-      <span class="opbadges"><span class="pill event">EVENT</span><span class="pill read">หรือ READ</span><span class="pill must">MUST</span><span class="pill ch3">3</span><span class="pill ch2">2</span></span></div>
-    <div class="opbody"><p class="purpose">ให้ Smart IPD รู้ว่าคำสั่งถูกรับ/จ่ายยาแล้ว/แล็บเสร็จ</p>
-      <div class="io out">Payload</div>
-      <table><tbody><tr><td><code>orderId</code></td><td>คำสั่ง</td></tr><tr><td><code>status</code></td><td>RECEIVED/DISPENSED/COMPLETED/CANCELLED</td></tr><tr><td><code>statusDateTime</code></td><td>เวลา</td></tr></tbody></table>
+      <span class="ep"><span class="m m-post">POST</span> {smartipd}/webhooks/order-status <i>(HIS เรียกเข้า Smart IPD)</i></span>
+      <span class="opbadges"><span class="pill event">EVENT</span><span class="pill must">MUST</span><span class="pill ch3">3</span><span class="pill ch2">2</span></span></div>
+    <div class="opbody">
+      <div class="uses">👉 <b>ใช้ทำอะไร:</b> ให้ Smart IPD รู้ว่าคำสั่งคืบหน้าถึงไหน — รับแล้ว / จ่ายยาแล้ว / แล็บเสร็จ</div>
+      <div class="io out">📤 Payload</div>
+      <table><tbody>
+        <tr><td class="fld">orderId</td><td class="typ">string</td><td>คำสั่งที่อัปเดต</td></tr>
+        <tr><td class="fld">status</td><td class="typ">string</td><td>RECEIVED / DISPENSED / COMPLETED / CANCELLED</td></tr>
+        <tr><td class="fld">statusDateTime</td><td class="typ">datetime</td><td>เวลาที่เปลี่ยนสถานะ</td></tr>
+      </tbody></table>
+      <div class="sample"><span class="lbl">ตัวอย่าง</span>{ orderId:"ORD78901", status:"DISPENSED", statusDateTime:"2025-01-14 11:30" }</div>
     </div>
   </div>
-
-  <h3>คำขอตรวจสอบ / ยืนยัน (เรียก HIS เพื่อ validate)</h3>
-  <p style="font-size:13px;color:var(--muted)">ไม่ใช่การเขียนข้อมูล แต่เป็นการเรียก HIS เพื่อ "ตรวจสอบ" — HIS ต้องเปิดให้</p>
-  <table>
-    <thead><tr><th>operation</th><th>ทำอะไร</th><th>ระดับ</th></tr></thead>
-    <tbody>
-      <tr><td class="op-id">His.ValidateMedicationOrder</td><td>ตรวจคำสั่งยากับกฎ/ขนาดของ HIS ก่อนยืนยัน</td><td><span class="pill opt">OPT</span></td></tr>
-      <tr><td class="op-id">His.GenerateDrugLabel</td><td>สร้างฉลากยา (ใช้ข้อมูล HIS)</td><td><span class="pill opt">OPT</span></td></tr>
-      <tr><td class="op-id">His.VerifyUserCredential</td><td>ยืนยันรหัสผ่าน/พยาน (med reconcile sign, dispensing, witness) — กรณีผู้ใช้เป็นบัญชี HIS/SSO</td><td><span class="pill opt">OPT</span></td></tr>
-    </tbody>
-  </table>
 </section>
 
-<!-- 9 optional -->
+<!-- 11 OPTIONAL -->
 <section id="se">
   <h2 class="sec">➕ 11. รายการเสริม (OPTIONAL)</h2>
+  <p class="secintro">เพิ่มทีหลังได้ — ไม่บังคับสำหรับเริ่มใช้งาน (go-live)</p>
   <table>
     <thead><tr><th>operation</th><th>ทิศทาง</th><th>ทำอะไร</th></tr></thead>
     <tbody>
-      <tr><td class="op-id">His.DispenseMedication / charge</td><td><span class="pill write">WRITE</span></td><td>บันทึกจ่ายยา + ตัดสต็อก/คิดเงิน (โมดูลเภสัช)</td></tr>
-      <tr><td class="op-id">His.GetExpenseSummary</td><td><span class="pill read">READ</span></td><td>สรุปค่าใช้จ่ายผู้ป่วย</td></tr>
-      <tr><td class="op-id">His.WriteDiagnosis / discharge status</td><td><span class="pill write">WRITE</span></td><td>ส่งวินิจฉัย/สถานะจำหน่ายเข้าเวชระเบียน</td></tr>
-      <tr><td class="op-id">His.GetVitalSigns</td><td><span class="pill read">READ</span></td><td>สัญญาณชีพ (ถ้า HIS เป็นผู้บันทึก)</td></tr>
-      <tr><td class="op-id">His.GetPatientPicture</td><td><span class="pill read">READ</span></td><td>รูปติดบัตรผู้ป่วย</td></tr>
-      <tr><td class="op-id">His.GetMedicalCertificate</td><td><span class="pill read">READ</span></td><td>ข้อมูลใบรับรองแพทย์</td></tr>
-      <tr><td class="op-id">His.Authenticate (SSO)</td><td><span class="pill read">READ</span></td><td>ล็อกอินด้วยบัญชี HIS</td></tr>
+      <tr><td class="fld">His.DispenseMedication / charge</td><td><span class="pill write">WRITE</span></td><td>บันทึกการจ่ายยา + ตัดสต็อก/คิดเงิน (ถ้าใช้โมดูลเภสัชของ Smart IPD)</td></tr>
+      <tr><td class="fld">His.GetExpenseSummary</td><td><span class="pill read">READ</span></td><td>สรุปค่าใช้จ่ายของผู้ป่วย</td></tr>
+      <tr><td class="fld">His.WriteDiagnosis / discharge status</td><td><span class="pill write">WRITE</span></td><td>ส่งวินิจฉัย (ICD)/สถานะจำหน่ายเข้าเวชระเบียน</td></tr>
+      <tr><td class="fld">His.GetPatientPicture</td><td><span class="pill read">READ</span></td><td>รูปติดบัตรผู้ป่วย</td></tr>
+      <tr><td class="fld">His.GetVisitHistory</td><td><span class="pill read">READ</span></td><td>ประวัติ OPD/IPD เดิม</td></tr>
+      <tr><td class="fld">His.Authenticate (SSO)</td><td><span class="pill read">READ</span></td><td>ล็อกอินด้วยบัญชีเดียวกับ HIS</td></tr>
     </tbody>
   </table>
 </section>
 
-<!-- 10 smart ipd owns -->
+<!-- 12 SMART IPD OWNS -->
 <section id="sx">
-  <h2 class="sec">🟢 12. ส่วนที่ Smart IPD เป็นเจ้าของเอง (HIS ไม่ต้องจัด)</h2>
-  <p>เพื่อความชัดเจน — รายการต่อไปนี้ Smart IPD เก็บ/กำหนดเอง <strong>HIS ไม่ต้องเตรียม</strong> แม้ในระบบเดิมจะเคยมาจาก HIS</p>
+  <h2 class="sec">🟢 12. ส่วนที่ Smart IPD ทำเอง (HIS ไม่ต้องจัด)</h2>
+  <p class="secintro">เพื่อความชัดเจน — รายการเหล่านี้ Smart IPD เก็บ/กำหนดเอง <strong>HIS ไม่ต้องเตรียม</strong></p>
   <table>
     <thead><tr><th>รายการ</th><th>ทำไมเป็นของ Smart IPD</th></tr></thead>
     <tbody>
-      <tr><td><span class="pill ipdown">Smart IPD</span> เอกสารคลินิก IPD ทั้งหมด — บันทึกแพทย์/พยาบาล, แผนการพยาบาล, คำสั่ง (ต้นฉบับ), eMAR, สรุปจำหน่าย, น้ำเข้า-ออก, med reconcile, รับผู้ป่วยใหม่</td><td>เนื้อหาเกิด/ใช้เฉพาะใน IPD — เก็บในฐานข้อมูล Smart IPD</td></tr>
-      <tr><td><span class="pill ipdown">Smart IPD</span> Master ของน้ำเข้า-ออก (Intake/Output items)</td><td>เป็น config ของ Smart IPD (เดิม TBM_IPD_INTAKE/OUTPUT)</td></tr>
-      <tr><td><span class="pill ipdown">Smart IPD</span> คลังแม่แบบงานพยาบาล FAIE (focus / assessment / intervention / outcome / nurse-note templates)</td><td>config เฉพาะงานพยาบาล IPD</td></tr>
-      <tr><td><span class="pill ipdown">Smart IPD</span> code list ของแบบฟอร์มรับผู้ป่วย (วิธีมา รพ., chief complaint type, ความสัมพันธ์, ที่อยู่อาศัย ฯลฯ)</td><td>enum ของฟอร์ม Smart IPD <em>(ตกลงรายต่อ HIS ได้ — บางรพ.อาจอยากใช้ของ HIS)</em></td></tr>
-      <tr><td><span class="pill ipdown">Smart IPD</span> Auth/JWT, ผู้ช่วย AI, ป้ายกำกับผู้ป่วย, ไฟล์ภาพ DICOM ในเครื่อง</td><td>ฟีเจอร์เฉพาะ Smart IPD</td></tr>
+      <tr><td><span class="pill ipdp">Smart IPD</span> เอกสารคลินิก IPD — บันทึกแพทย์/พยาบาล, แผนการพยาบาล, คำสั่ง (ต้นฉบับ), eMAR, สรุปจำหน่าย, ทบทวนยา, รับผู้ป่วยใหม่</td><td>เนื้อหาเกิด/ใช้เฉพาะใน IPD</td></tr>
+      <tr><td><span class="pill ipdp">Smart IPD</span> Master น้ำเข้า-ออก (Intake/Output) + คลังแม่แบบงานพยาบาล (FAIE)</td><td>config เฉพาะงาน IPD</td></tr>
+      <tr><td><span class="pill ipdp">Smart IPD</span> ระบบล็อกอิน/สิทธิ์, ผู้ช่วย AI, ป้ายกำกับผู้ป่วย</td><td>ฟีเจอร์เฉพาะ Smart IPD</td></tr>
     </tbody>
   </table>
-  <div class="callout ipd"><p><strong>สรุป:</strong> HIS จัดเฉพาะ "ข้อมูลกลางของโรงพยาบาล" (ข้อ 2–9) ส่วน "เนื้อหาการดูแลผู้ป่วยใน" Smart IPD ดูแลเอง</p></div>
+  <div class="callout ipd"><p><strong>สรุป:</strong> HIS จัดเฉพาะ "ข้อมูลกลางของโรงพยาบาล" (ข้อ 2–10) — ส่วน "เนื้อหาการดูแลผู้ป่วยใน" Smart IPD ดูแลเอง</p></div>
 </section>
 
-<!-- 11 nfr + conformance -->
+<!-- 13 NFR + CONFORMANCE -->
 <section id="snf">
-  <h2 class="sec">🔒 13. Non-functional &amp; Conformance</h2>
-  <h3>Non-functional</h3>
+  <h2 class="sec">🔒 13. ความปลอดภัย &amp; Checklist</h2>
+  <h3>ความปลอดภัย / สิ่งที่ต้องตกลง</h3>
   <ul>
-    <li><strong>Auth:</strong> DB → read-only; API → OAuth2/API key/mTLS; EVENT → verify signature</li>
-    <li><strong>Encryption:</strong> HTTPS/TLS · <strong>Idempotency:</strong> SubmitOrder กันส่งซ้ำด้วย orderId</li>
-    <li><strong>Environments:</strong> มี Test/UAT + ข้อมูลตัวอย่าง ก่อน Production</li>
-    <li><strong>Error:</strong> ตอบรหัสที่สื่อความหมาย (ไม่พบผู้ป่วย / คำสั่งถูกปฏิเสธ + เหตุผล)</li>
-    <li><strong>Availability:</strong> ตกลงเวลาให้บริการ + พฤติกรรมเมื่อ HIS ออฟไลน์ (อ่านจาก cache, WRITE เข้าคิว retry)</li>
+    <li><strong>การเข้าถึง:</strong> DB → บัญชี <b>อ่านอย่างเดียว</b> · API → ระบุวิธียืนยันตัวตน (OAuth2 / API key / certificate)</li>
+    <li><strong>เครือข่าย/ความลับ:</strong> เปิด firewall เฉพาะที่จำเป็น · รับส่งผ่าน HTTPS/TLS</li>
+    <li><strong>กันส่งซ้ำ:</strong> SubmitOrder ต้อง idempotent — Smart IPD อ้าง <code>orderId</code> ที่ได้กลับ</li>
+    <li><strong>ระบบทดสอบ:</strong> มีชุด Test/UAT + ข้อมูลตัวอย่าง ก่อนเปิด Production</li>
+    <li><strong>เมื่อ HIS ล่ม:</strong> อ่านใช้ cache ได้ · เขียนเข้าคิวรอ retry</li>
   </ul>
-  <h3>Conformance Checklist — ขั้นต่ำเพื่อ Go-Live</h3>
+  <h3>✅ Checklist ขั้นต่ำเพื่อเริ่มใช้งาน (Go-Live)</h3>
   <ul class="check">
     <li><b>GetAdmittedPatients + PatientEvents</b> — รายชื่อในวอร์ด + เหตุการณ์ ADT</li>
-    <li><b>GetPatientInfo / GetPatientAdmissionCard</b> — demographics + แพ้ยา + การรับเข้า</li>
-    <li><b>นัดหมาย</b> — อ่านปฏิทิน/ช่องเวลา + สร้าง/แก้/ยกเลิก/เลื่อน (ถ้าใช้ฟีเจอร์นัด)</li>
-    <li><b>Master: วอร์ด/เตียง, ห้อง, urgent type, general order category</b></li>
+    <li><b>GetPatientInfo / AdmissionCard</b> — ข้อมูลผู้ป่วย + แพ้ยา</li>
+    <li><b>นัดหมาย</b> — อ่านปฏิทิน + สร้าง/แก้/ยกเลิก/เลื่อน (ถ้าใช้ฟีเจอร์นัด)</li>
+    <li><b>Master: วอร์ด/เตียง, ห้อง, urgent, general order</b></li>
     <li><b>Master: ICD + diagnosis types + discharge status/type + organs</b></li>
-    <li><b>Drug catalog</b> — ค้นยา + timing/route/form/unit + ราคา</li>
-    <li><b>Lab + Xray catalog</b> — รายการ + group/modality</li>
-    <li><b>Directory</b> — แพทย์ / พยาบาล</li>
-    <li><b>GetLabResults / GetXrayResults</b> — ผล + ลิงก์ PACS</li>
-    <li><b>สัญญาณชีพ</b> — อ่าน (กราฟ/ตาราง) + เขียน (บันทึก/แก้/ลบ) — ถ้า HIS เป็นเจ้าของ</li>
+    <li><b>บัญชียา</b> — ค้นยา + timing/route/form/unit + ราคา</li>
+    <li><b>แล็บ + เอกซเรย์ catalog</b> — รายการ + group/modality</li>
+    <li><b>บุคลากร</b> — แพทย์/พยาบาล/เภสัชกร</li>
+    <li><b>ผลแล็บ + ผลเอกซเรย์ + PACS</b></li>
+    <li><b>สัญญาณชีพ</b> — อ่าน + เขียน (ถ้า HIS เป็นเจ้าของ)</li>
     <li><b>SubmitOrder</b> — รับคำสั่ง + ตอบ orderId</li>
     <li><b>UpdateOrder + OrderStatusFeedback</b> — แก้/ยกเลิก + แจ้งสถานะกลับ</li>
-    <li><b>รหัสอ้างอิง + Auth + Test environment</b></li>
+    <li><b>รหัสอ้างอิง (HN/AN/userId/itemCode) + Auth + ระบบทดสอบ</b></li>
   </ul>
 </section>
 
-<footer>Smart IPD — HIS Provider API Specification · v1.1 · 11 มิถุนายน 2026 · สิ่งที่ HIS ต้องจัดให้ Smart IPD</footer>
+<!-- APPENDIX: ENDPOINT SUMMARY -->
+<section id="sep">
+  <h2 class="sec">🗺️ ภาคผนวก — สรุป Endpoint ทั้งหมด (Path API)</h2>
+  <p class="secintro">รวมทุก path ในตารางเดียว (path เป็นข้อเสนอ — HIS ตั้งจริงเป็นอะไรก็ได้). <span class="pill event">EVENT</span> = HIS เรียกเข้า webhook ของ Smart IPD</p>
+  <table>
+    <thead><tr><th>Method</th><th>Path (ตัวอย่าง)</th><th>operation</th><th>ทิศทาง</th><th>ระดับ</th></tr></thead>
+    <tbody>
+      <tr><td><span class="m m-get">GET</span></td><td class="fld">/his/patients/admitted</td><td>รายชื่อผู้ป่วยในวอร์ด</td><td><span class="pill read">READ</span></td><td class="req">MUST</td></tr>
+      <tr><td><span class="m m-get">GET</span></td><td class="fld">/his/patients/{an}</td><td>ข้อมูลผู้ป่วย</td><td><span class="pill read">READ</span></td><td class="req">MUST</td></tr>
+      <tr><td><span class="m m-get">GET</span></td><td class="fld">/his/patients/{an}/admission-card</td><td>บัตรผู้ป่วยฉบับเต็ม</td><td><span class="pill read">READ</span></td><td class="req">MUST</td></tr>
+      <tr><td><span class="m m-post">POST</span></td><td class="fld">{smartipd}/webhooks/adt</td><td>เหตุการณ์ ADT</td><td><span class="pill event">EVENT</span></td><td class="req">MUST</td></tr>
+      <tr><td><span class="m m-get">GET</span></td><td class="fld">/his/appointments/slots</td><td>ปฏิทิน/ช่องเวลานัด</td><td><span class="pill read">READ</span></td><td class="opt2">MUST*</td></tr>
+      <tr><td><span class="m m-get">GET</span></td><td class="fld">/his/patients/{an}/appointments</td><td>นัดของผู้ป่วย</td><td><span class="pill read">READ</span></td><td class="opt2">MUST*</td></tr>
+      <tr><td><span class="m m-post">POST</span></td><td class="fld">/his/appointments</td><td>สร้างนัด</td><td><span class="pill write">WRITE</span></td><td class="opt2">MUST*</td></tr>
+      <tr><td><span class="m m-patch">PATCH</span></td><td class="fld">/his/appointments/{appointId}</td><td>แก้/ยกเลิก/เลื่อนนัด</td><td><span class="pill write">WRITE</span></td><td class="opt2">MUST*</td></tr>
+      <tr><td><span class="m m-get">GET</span></td><td class="fld">/his/master/{name}</td><td>master ตั้งต้น (wards/icd/discharge-types/…)</td><td><span class="pill read">READ</span></td><td class="req">MUST</td></tr>
+      <tr><td><span class="m m-get">GET</span></td><td class="fld">/his/master/drugs · /his/master/drugs/{drugCode}</td><td>บัญชียา</td><td><span class="pill read">READ</span></td><td class="req">MUST</td></tr>
+      <tr><td><span class="m m-get">GET</span></td><td class="fld">/his/master/labs · /his/master/xrays</td><td>บัญชีแล็บ/เอกซเรย์</td><td><span class="pill read">READ</span></td><td class="req">MUST</td></tr>
+      <tr><td><span class="m m-get">GET</span></td><td class="fld">/his/staff?role={…}</td><td>ทำเนียบบุคลากร</td><td><span class="pill read">READ</span></td><td class="req">MUST</td></tr>
+      <tr><td><span class="m m-get">GET</span></td><td class="fld">/his/patients/{an}/lab-results</td><td>ผลแล็บ</td><td><span class="pill read">READ</span></td><td class="req">MUST</td></tr>
+      <tr><td><span class="m m-get">GET</span></td><td class="fld">/his/patients/{an}/xray-results</td><td>ผลเอกซเรย์ + PACS</td><td><span class="pill read">READ</span></td><td class="req">MUST</td></tr>
+      <tr><td><span class="m m-get">GET</span></td><td class="fld">/his/patients/{an}/vitals</td><td>อ่านสัญญาณชีพ</td><td><span class="pill read">READ</span></td><td class="opt2">MUST*</td></tr>
+      <tr><td><span class="m m-post">POST</span></td><td class="fld">/his/patients/{an}/vitals</td><td>บันทึก/แก้สัญญาณชีพ</td><td><span class="pill write">WRITE</span></td><td class="opt2">MUST*</td></tr>
+      <tr><td><span class="m m-post">POST</span></td><td class="fld">/his/orders</td><td>ส่งคำสั่ง → ตอบ orderId</td><td><span class="pill write">WRITE</span></td><td class="req">MUST</td></tr>
+      <tr><td><span class="m m-patch">PATCH</span></td><td class="fld">/his/orders/{orderId}</td><td>แก้/ยกเลิก/พักคำสั่ง</td><td><span class="pill write">WRITE</span></td><td class="req">MUST</td></tr>
+      <tr><td><span class="m m-post">POST</span></td><td class="fld">{smartipd}/webhooks/order-status</td><td>แจ้งสถานะคำสั่งกลับ</td><td><span class="pill event">EVENT</span></td><td class="req">MUST</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12.5px;color:var(--muted)">* MUST เฉพาะกรณีใช้ฟีเจอร์นั้น (นัดหมาย / สัญญาณชีพผ่าน HIS) · รายการ OPTIONAL อื่น ๆ ดูข้อ 11</p>
+</section>
+
+<footer>Smart IPD — HIS Provider API Specification · v2.1 · 11 มิถุนายน 2026 · สิ่งที่ HIS ต้องจัดให้ Smart IPD</footer>
 </div>
 </body>
 </html>
